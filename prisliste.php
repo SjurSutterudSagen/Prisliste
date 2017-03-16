@@ -51,7 +51,7 @@ function prisliste_install() {
     $sql = "CREATE TABLE $table_name_product_allergens (
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       product_id mediumint(9) NOT NULL,
-      allergen_name varchar(200) NOT NULL,
+      allergen_name varchar(255) NOT NULL,
       PRIMARY KEY  (id),
       FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
     ) $charset_collate;";
@@ -60,7 +60,7 @@ function prisliste_install() {
     $sql = "CREATE TABLE $table_name_product_ingredients (
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       product_id mediumint(9) NOT NULL,
-      ingredient_name varchar(200) NOT NULL,
+      ingredient_name varchar(255) NOT NULL,
       allergen boolean DEFAULT 0 NOT NULL,
       PRIMARY KEY  (id),
       FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
@@ -103,7 +103,7 @@ function prisliste_install() {
         $sql = "CREATE TABLE $table_name_product_allergens (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             product_id mediumint(9) NOT NULL,
-            allergen_name varchar(200) NOT NULL,
+            allergen_name varchar(255) NOT NULL,
             PRIMARY KEY  (id),
             FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
         ) $charset_collate;";
@@ -112,7 +112,7 @@ function prisliste_install() {
         $sql = "CREATE TABLE $table_name_product_ingredients (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             product_id mediumint(9) NOT NULL,
-            ingredient_name varchar(200) NOT NULL,
+            ingredient_name varchar(255) NOT NULL,
             allergen boolean DEFAULT 0 NOT NULL,
             PRIMARY KEY  (id),
             FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
@@ -121,6 +121,13 @@ function prisliste_install() {
 
         update_option( 'prisliste_db_version', $prisliste_db_version );
     }
+}
+
+//function for creating 2 dummy items in 2 dummy categories
+function prisliste_install_data() {
+    global $wpdb;
+
+    
 }
 
 //creating the db when plugin is activated
