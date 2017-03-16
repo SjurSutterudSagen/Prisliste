@@ -7,8 +7,27 @@ Version: 0.1
 */
 
 /*****
- * Tutorial Used: https://codex.wordpress.org/Creating_Tables_with_Plugins
+ * Tutorials Used:
+ * https://codex.wordpress.org/Creating_Tables_with_Plugins
+ * https://codex.wordpress.org/Shortcode_API
  *****/
+
+/******  TEMP FUNCTION FOR DEV   ******/
+function prisliste_drop_db() {
+    //drop custom database tables
+    global $wpdb;
+
+    $table_name_main = $wpdb->prefix . "prisliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
+    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+
+    $wpdb->query("DROP TABLE IF EXISTS $table_name_product_ingredients");
+    $wpdb->query("DROP TABLE IF EXISTS $table_name_product_allergens");
+    $wpdb->query("DROP TABLE IF EXISTS $table_name_main");
+    $wpdb->query("DROP TABLE IF EXISTS $table_name_product_category");
+}
+register_deactivation_hook( __FILE__, 'prisliste_drop_db' );
 
 
 //check for security
