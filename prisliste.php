@@ -49,17 +49,21 @@ function prisliste_install() {
     dbDelta($sql);
 
     $sql = "CREATE TABLE $table_name_product_allergens (
-      allergen_name varchar(255) NOT NULL,
+      id mediumint(9) NOT NULL AUTO_INCREMENT,
       product_id mediumint(9) NOT NULL,
-      PRIMARY KEY  (allergen_name, product_id)
+      allergen_name varchar(200) NOT NULL,
+      PRIMARY KEY  (id),
+      FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
     ) $charset_collate;";
     dbDelta($sql);
 
     $sql = "CREATE TABLE $table_name_product_ingredients (
+      id mediumint(9) NOT NULL AUTO_INCREMENT,
       product_id mediumint(9) NOT NULL,
-      ingredient_name varchar(255) NOT NULL,
+      ingredient_name varchar(200) NOT NULL,
       allergen boolean DEFAULT 0 NOT NULL,
-      PRIMARY KEY  (product_id, ingredient_name)
+      PRIMARY KEY  (id),
+      FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
     ) $charset_collate;";
     dbDelta($sql);
     add_option( 'prisliste_db_version', $prisliste_db_version );
@@ -78,35 +82,41 @@ function prisliste_install() {
 
         //SQL queries and tables creation
         $sql = "CREATE TABLE $table_name_product_category (
-          category_id mediumint(9) NOT NULL AUTO_INCREMENT,
-          category_name varchar(255) NOT NULL UNIQUE,
-          PRIMARY KEY  (category_id)
-        );";
+            category_id mediumint(9) NOT NULL AUTO_INCREMENT,
+            category_name varchar(255) NOT NULL,
+            PRIMARY KEY  (category_id)
+        ) $charset_collate;";
         dbDelta($sql);
 
+
         $sql = "CREATE TABLE $table_name_main (
-          id mediumint(9) NOT NULL AUTO_INCREMENT,
-          category mediumint(9) NOT NULL,
-          name varchar(255) NOT NULL,
-          pris mediumint(9) NOT NULL,
-          picture_url varchar(255) DEFAULT '' NOT NULL,
-          PRIMARY KEY  (id)
-        );";
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            category mediumint(9) NOT NULL,
+            product_name varchar(255) NOT NULL,
+            pris mediumint(9) NOT NULL,
+            picture_url varchar(255) DEFAULT '' NOT NULL,
+            PRIMARY KEY  (id),
+            FOREIGN KEY  (category) REFERENCES $table_name_product_category(category_id)
+        ) $charset_collate;";
         dbDelta($sql);
-    
+
         $sql = "CREATE TABLE $table_name_product_allergens (
-          allergen_name varchar(255) NOT NULL,
-          product_id mediumint(9) NOT NULL,
-          PRIMARY KEY  (allergen_name, product_id)
-        );";
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            product_id mediumint(9) NOT NULL,
+            allergen_name varchar(200) NOT NULL,
+            PRIMARY KEY  (id),
+            FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
+        ) $charset_collate;";
         dbDelta($sql);
-        
+
         $sql = "CREATE TABLE $table_name_product_ingredients (
-          product_id mediumint(9) NOT NULL,
-          ingredient_name varchar(255) NOT NULL,
-          allergen boolean DEFAULT 0 NOT NULL,
-          PRIMARY KEY  (product_id, ingredient_name)
-        );";
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            product_id mediumint(9) NOT NULL,
+            ingredient_name varchar(200) NOT NULL,
+            allergen boolean DEFAULT 0 NOT NULL,
+            PRIMARY KEY  (id),
+            FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
+        ) $charset_collate;";
         dbDelta($sql);
 
         update_option( 'prisliste_db_version', $prisliste_db_version );
