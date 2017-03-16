@@ -374,5 +374,6 @@ function prisliste_setup_menu() {
  * Section for shortcode
  */
 tester github i discord
+tester github i discord
 
 ?>
