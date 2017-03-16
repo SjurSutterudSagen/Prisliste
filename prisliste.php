@@ -31,35 +31,39 @@ function prisliste_install() {
     //SQL query and table creating
     $sql = "CREATE TABLE $table_name_product_category (
       category_id mediumint(9) NOT NULL AUTO_INCREMENT,
-      category_name tinytext NOT NULL UNIQUE,
+      category_name text NOT NULL UNIQUE,
       PRIMARY KEY  (category_id)
     ) $charset_collate;
 
     CREATE TABLE $table_name_main (
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       category mediumint(9) NOT NULL,
-      name tinytext NOT NULL,
-      pris INT NOT NULL,
+      name text NOT NULL,
+      pris mediumint(9) NOT NULL,
       picture_url varchar(255) DEFAULT '' NOT NULL,
       PRIMARY KEY  (id)
     ) $charset_collate;
 
     CREATE TABLE $table_name_product_allergens (
-      id mediumint(9) NOT NULL AUTO_INCREMENT,
-      
+      allergen_name text NOT NULL,
+      product_id mediumint(9) NOT NULL,
+      PRIMARY KEY  (allergen_name, product_id)
     ) $charset_collate;
     
     CREATE TABLE $table_name_product_ingredients (
-      id mediumint(9) NOT NULL AUTO_INCREMENT,
-      product_id mediumint(9) NOT NULL
+      product_id mediumint(9) NOT NULL,
+      ingredient_name text NOT NULL,
+      allergen boolean DEFAULT 0 NOT NULL,
+      PRIMARY KEY  (product_id, ingredient_name)
     ) $charset_collate;
     ";
     dbDelta($sql);
 
     add_option( 'prisliste_db_version', $prisliste_db_version );
-
 }
 
+//creating the db when plugin is activated
+register_activation_hook( __FILE__, 'prisliste_install' );
 
 
 add_action('admin_menu', 'prisliste_setup_menu');
