@@ -6,6 +6,11 @@ Author: Sjur Sutterud Sagen
 Version: 0.1
 */
 
+/*****
+ * Tutorial Used: https://codex.wordpress.org/Creating_Tables_with_Plugins
+ *****/
+
+
 //check for security
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
@@ -127,11 +132,185 @@ function prisliste_install() {
 function prisliste_install_data() {
     global $wpdb;
 
-    
+    $table_name_main = $wpdb->prefix . "prisliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
+    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+
+    //category table
+    $wpdb->insert(
+        $table_name_product_category,
+        array(
+            'category_name' => 'Kjøtt'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_category,
+        array(
+            'category_name' => 'Pølser'
+        )
+    );
+
+    //product table
+    $wpdb->insert(
+        $table_name_main,
+        array(
+            'category' => 0,
+            'product_name' => 'Elgstek',
+            'pris' => 250,
+            'picture_url' => 'img/eksempel-bilde-1.png'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_main,
+        array(
+            'category' => 0,
+            'product_name' => 'Hjortestek',
+            'pris' => 240,
+            'picture_url' => 'img/eksempel-bilde-2.png'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_main,
+        array(
+            'category' => 1,
+            'product_name' => 'Elgpølse',
+            'pris' => 200,
+            'picture_url' => 'img/eksempel-bilde-3.png'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_main,
+        array(
+            'category' => 1,
+            'product_name' => 'Plagepølse',
+            'pris' => 190,
+            'picture_url' => 'img/eksempel-bilde-4.png'
+        )
+    );
+
+    //ingredients table
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 0,
+            'ingredient_name' => 'Elgkjøtt',
+            'allergen' => 0
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 0,
+            'ingredient_name' => 'Krydder Mix',
+            'allergen' => 1
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 1,
+            'ingredient_name' => 'Elgkjøtt',
+            'allergen' => 0
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 1,
+            'ingredient_name' => 'Krydder Mix',
+            'allergen' => 1
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 2,
+            'ingredient_name' => 'Elgkjøtt',
+            'allergen' => 0
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 2,
+            'ingredient_name' => 'Krydder Mix',
+            'allergen' => 1
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 3,
+            'ingredient_name' => 'Elgkjøtt',
+            'allergen' => 0
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 3,
+            'ingredient_name' => 'Krydder Mix',
+            'allergen' => 1
+        )
+    );
+
+    //allergens table
+    $wpdb->insert(
+        $table_name_product_allergens,
+        array(
+            'product_id' => 0,
+            'allergen_name' => 'Nøtteallergi'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_allergens,
+        array(
+            'product_id' => 1,
+            'allergen_name' => 'Nøtteallergi'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_allergens,
+        array(
+            'product_id' => 2,
+            'allergen_name' => 'Nøtteallergi'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_allergens,
+        array(
+            'product_id' => 3,
+            'allergen_name' => 'Nøtteallergi'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_allergens,
+        array(
+            'product_id' => 3,
+            'allergen_name' => 'Melkeallergi'
+        )
+    );
 }
 
 //creating the db when plugin is activated
 register_activation_hook( __FILE__, 'prisliste_install' );
+register_activation_hook( __FILE__, 'prisliste_install_data' );
 
 //update check on the db for new plugin version
 function prisliste_update_db_check() {
@@ -163,7 +342,9 @@ function prisliste_setup_menu() {
         echo $wpdb->prefix . 'prisliste_kategorier<br>';
         echo $wpdb->prefix . 'prisliste_produkt_ingredienser<br>';
         echo $wpdb->prefix . 'prisliste_produkt_allergener<br>';
-        echo $wpdb->get_charset_collate();
+        echo $wpdb->get_charset_collate() . '<br>';
+        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
+
     }
 
     //function prisliste_handle_post() {
