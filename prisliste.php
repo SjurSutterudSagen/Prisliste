@@ -375,5 +375,6 @@ function prisliste_setup_menu() {
  */
 tester github i discord
 tester github i discord
+tester github i discord
 
 ?>
