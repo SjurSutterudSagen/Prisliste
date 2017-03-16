@@ -368,8 +368,11 @@ function prisliste_setup_menu() {
     //function prisliste_handle_post() {
 
     //}
-
-
 }
+
+/*
+ * Section for shortcode
+ */
+
 
 ?>
