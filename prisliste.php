@@ -40,7 +40,7 @@ $prisliste_db_version = "1.1";
 //Function for creating the DB tables on plugin activation
 function prisliste_install() {
 
-    global $wpdb;//grabbing the wp database prefix in this install
+    global $wpdb;
     global $prisliste_db_version;
 
     //loading library for dbDelta function
@@ -362,6 +362,8 @@ function prisliste_setup_menu() {
         echo $wpdb->prefix . 'prisliste_produkt_allergener<br>';
         echo $wpdb->get_charset_collate() . '<br>';
         echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
+        echo '<br>';
+        show_prisliste();
 
     }
 
@@ -369,10 +371,75 @@ function prisliste_setup_menu() {
 
     //}
 }
+//function for building the frontend part
+function show_prisliste(){
+    global $wpdb;
+    $categories;
+    $prisliste_results;
+    $ingredients;
+    $allergens;
+    $prisliste_full_arr;
 
-/*
- * Section for shortcode
- */
+    $table_name_main = $wpdb->prefix . "prisliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
+    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+
+    //query the db for categories
+    $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A)
+                    or die ( $wpdb->last_error );
+
+    //query the db for all products with category name
+    $prisliste_results =  $wpdb->get_results("
+        SELECT p.id, p.category, p.product_name, p.pris, p.picture_url
+        FROM    {$table_name_main} p
+    ", ARRAY_A)or die ( $wpdb->last_error );
+
+    //query db for data on ingredients and allergens
+    $ingredients = $wpdb->get_results("
+        SELECT product_id, ingredient_name, allergen
+        FROM    {$table_name_product_ingredients}
+    ", ARRAY_A)or die ( $wpdb->last_error );
+
+    $allergens = $wpdb->get_results("
+        SELECT product_id, allergen_name
+        FROM    {$table_name_product_allergens}
+    ", ARRAY_A)or die ( $wpdb->last_error );
+
+    foreach ($categories as $category) {
+        echo 'Kategori navnet er: '; print($category['category_name']); echo '<br><br>';
+        foreach ($prisliste_results as $product) {
+            if ($category['category_id'] === $product['category']){
+                echo 'Produkt navnet er: '; print($product['product_name']); echo '<br>';
+                foreach ($ingredients as $ingredient) {
+                    if ($product['id'] === $ingredient['product_id']) {
+                        echo 'Ingrediens navnet er: '; print($ingredient['ingredient_name']);
+                        if ($ingredient['allergen'] == 1) {
+                            echo ' som er et allergen. ';
+                        } else {
+                            echo ' som er ikke et allergen. ';
+                        }
+                        echo '<br>';
+                    }
+
+                }
+                echo 'Allergenene i dette produktet er: ';
+                foreach ($allergens as $allergen) {
+                    if ($product['id'] === $allergen['product_id']) {
+                        print($allergen['allergen_name']); echo ' ';
+
+                    }
+
+                }
+                echo '<br><br>';
+            }
+        }
+        echo '<br>';
+
+    }
+}
+
+//registrering the shortcode
 
 
 ?>
