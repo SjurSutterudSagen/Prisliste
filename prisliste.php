@@ -29,6 +29,17 @@ function prisliste_drop_db() {
 }
 register_deactivation_hook( __FILE__, 'prisliste_drop_db' );
 
+//loading javascript for users
+//    function load_prisliste_js(){
+//        wp_enqueue_script('prisliste', plugins_url('/js/prisliste.js', __FILE__), array('jquery'));
+//    }
+//    do_action('init', 'load_prisliste_js');
+
+//loading javascript for adminpage
+function load_prisliste_js_admin(){
+    admin_enqueue_script('prisliste', plugins_dir_url(__FILE__) . '/js/prisliste.js', array('jquery'));
+}
+add_action('init', 'load_prisliste_js_admin');
 
 //check for security
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
@@ -231,15 +242,6 @@ function prisliste_install_data() {
     $wpdb->insert(
         $table_name_product_ingredients,
         array(
-            'product_id' => 1,
-            'ingredient_name' => 'Krydder Mix',
-            'allergen' => 1
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
             'product_id' => 2,
             'ingredient_name' => 'Elgkjøtt',
             'allergen' => 0
@@ -251,6 +253,42 @@ function prisliste_install_data() {
         array(
             'product_id' => 2,
             'ingredient_name' => 'Krydder Mix',
+            'allergen' => 1
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 2,
+            'ingredient_name' => 'Svinehjerter',
+            'allergen' => 0
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 2,
+            'ingredient_name' => 'Svinetunger',
+            'allergen' => 0
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 2,
+            'ingredient_name' => 'Storfekjøtt',
+            'allergen' => 0
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_ingredients,
+        array(
+            'product_id' => 2,
+            'ingredient_name' => 'Krydderblanding (Surhetsregulerende middel (E575), krydder, dekstrose (mais), Smaksforsterker (E621), Antioksidant (E301, E392, E300))',
             'allergen' => 1
         )
     );
@@ -295,14 +333,6 @@ function prisliste_install_data() {
     $wpdb->insert(
         $table_name_product_allergens,
         array(
-            'product_id' => 1,
-            'allergen_name' => 'Nøtteallergi'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_allergens,
-        array(
             'product_id' => 2,
             'allergen_name' => 'Nøtteallergi'
         )
@@ -329,6 +359,14 @@ function prisliste_install_data() {
         array(
             'product_id' => 4,
             'allergen_name' => 'Melkeallergi'
+        )
+    );
+
+    $wpdb->insert(
+        $table_name_product_allergens,
+        array(
+            'product_id' => 4,
+            'allergen_name' => 'Pollenallergi'
         )
     );
 }
@@ -377,7 +415,8 @@ function prisliste_setup_menu() {
     //}
 }
 //function for building the frontend part
-function show_prisliste(){
+function show_prisliste()
+{
     global $wpdb;
     $categories;
     $prisliste_results;
@@ -441,59 +480,54 @@ function show_prisliste(){
                                  class="accordion-image"
                             />
                             <div class="accordion-list">
-                                <h3>Ingredienser</h3>
-                                <ul>
-                                    <li>Elgkjøtt (60%)</li>
-                                    <li>Svinehjerter</li>
-                                    <li>Storfekjøtt</li>
-                                    <li>Svinetunger</li>
-                                    <li>Spekk</li>
-                                    <li>Blod</li>
-                                    <li>Salt</li>
-                                    <li>Krydderblanding (Surhetsregulerende middel (E575), krydder, dekstrose (mais), Smaksforsterker (E621), Antioksidant (E301, E392, E300))</li>
-                                    <li>Bestrålt krydder</li>
-                                </ul>
+                                <div><h3>Ingredienser</h3></div>
+                                <div>
+                                    <ul>
+                                        <?php
+                                        foreach ($ingredients as $ingredient) {
+                                            if ($product['id'] === $ingredient['product_id']) {
+                                                echo '<li>';
+                                                if ( $ingredient['allergen'] == 1 ) {
+                                                    echo '<b>';
+                                                        echo esc_html( $ingredient['ingredient_name'] );
+                                                    echo '</b>';
+                                                } else {
+                                                    echo esc_html( $ingredient['ingredient_name'] );
+                                                }
+                                                echo '</li>';
+                                            }
+                                        }
+                                        ?>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <?php
+                                    $count=0;
+                                    foreach ($allergens as $allergen) {
+                                        if ($product['id'] === $allergen['product_id']) {
+                                            if ($count == 0){
+                                                echo '<h3>Allergier</h3>';
+                                                $count++;
+                                            }
+                                            echo esc_html( $allergen['allergen_name'] ) . ' ';
+                                        }
+                                    }
+                                    ?>
+                                </div>
                             </div>
                         </div>
-
                         <?php
-
-                        echo 'Produkt navnet er: '; print($product['product_name']); echo '<br>';
-                        foreach ($ingredients as $ingredient) {
-                            if ($product['id'] === $ingredient['product_id']) {
-                                echo 'Ingrediens navnet er: '; print($ingredient['ingredient_name']);
-                                if ($ingredient['allergen'] == 1) {
-                                    echo ' som er et allergen. ';
-                                } else {
-                                    echo ' som er ikke et allergen. ';
-                                }
-                                echo '<br>';
-                            }
-                        }
-                        echo 'Allergenene i dette produktet er: ';
-                        foreach ($allergens as $allergen) {
-                            if ($product['id'] === $allergen['product_id']) {
-                                print($allergen['allergen_name']); echo ' ';
-                            }
-                        }
-                        echo '<br><br>';
                     }
                 }
-                echo '<br>';
                 ?>
             </div>
             <?php
-
-
-
         }
         ?>
     </div>
+    <?php
+}
 
-
-
-
-<?php
 //    foreach ($categories as $category) {
 //        echo 'Kategori navnet er: '; print($category['category_name']); echo '<br><br>';
 //        foreach ($prisliste_results as $product) {
@@ -521,9 +555,7 @@ function show_prisliste(){
 //        }
 //        echo '<br>';
 //    }
-}
+//}
 
 //registrering the shortcode
-
-
 ?>
