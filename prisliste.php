@@ -67,6 +67,7 @@ function prisliste_install() {
       product_name varchar(255) NOT NULL,
       pris mediumint(9) NOT NULL,
       picture_url varchar(255) DEFAULT '' NOT NULL,
+      picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
       PRIMARY KEY  (id),
       FOREIGN KEY  (category) REFERENCES $table_name_product_category(category_id)
     ) $charset_collate;";
@@ -119,6 +120,7 @@ function prisliste_install() {
             product_name varchar(255) NOT NULL,
             pris mediumint(9) NOT NULL,
             picture_url varchar(255) DEFAULT '' NOT NULL,
+            picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
             PRIMARY KEY  (id),
             FOREIGN KEY  (category) REFERENCES $table_name_product_category(category_id)
         ) $charset_collate;";
@@ -178,7 +180,8 @@ function prisliste_install_data() {
             'category' => 1,
             'product_name' => 'Elgstek',
             'pris' => 250,
-            'picture_url' => 'img/eksempel-bilde-1.png'
+            'picture_url' => 'img/eksempel-bilde-1.png',
+            'picture_alt_tag' => 'Kort om bildet til produkt 1'
         )
     );
 
@@ -188,7 +191,8 @@ function prisliste_install_data() {
             'category' => 1,
             'product_name' => 'Hjortestek',
             'pris' => 240,
-            'picture_url' => 'img/eksempel-bilde-2.png'
+            'picture_url' => 'img/eksempel-bilde-2.png',
+            'picture_alt_tag' => 'Kort om bildet til produkt 2'
         )
     );
 
@@ -198,7 +202,8 @@ function prisliste_install_data() {
             'category' => 2,
             'product_name' => 'Elgpølse',
             'pris' => 200,
-            'picture_url' => 'img/eksempel-bilde-3.png'
+            'picture_url' => 'img/eksempel-bilde-3.png',
+            'picture_alt_tag' => 'Kort om bildet til produkt 3'
         )
     );
 
@@ -208,7 +213,8 @@ function prisliste_install_data() {
             'category' => 2,
             'product_name' => 'Plagepølse',
             'pris' => 190,
-            'picture_url' => 'img/eksempel-bilde-4.png'
+            'picture_url' => 'img/eksempel-bilde-4.png',
+            'picture_alt_tag' => 'Kort om bildet til produkt 4'
         )
     );
 
@@ -354,15 +360,14 @@ function prisliste_setup_menu() {
     function prisliste_init() {
         //prisliste_handle_post();
 
-        echo '<h1>Prisliste</h1>';
-        global $wpdb;//grabbing the wp database prefix in this install
-        echo $wpdb->prefix . 'prisliste<br>';
-        echo $wpdb->prefix . 'prisliste_kategorier<br>';
-        echo $wpdb->prefix . 'prisliste_produkt_ingredienser<br>';
-        echo $wpdb->prefix . 'prisliste_produkt_allergener<br>';
-        echo $wpdb->get_charset_collate() . '<br>';
-        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
-        echo '<br>';
+//        global $wpdb;//grabbing the wp database prefix in this install
+//        echo $wpdb->prefix . 'prisliste<br>';
+//        echo $wpdb->prefix . 'prisliste_kategorier<br>';
+//        echo $wpdb->prefix . 'prisliste_produkt_ingredienser<br>';
+//        echo $wpdb->prefix . 'prisliste_produkt_allergener<br>';
+//        echo $wpdb->get_charset_collate() . '<br>';
+//        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
+//        echo '<br>';
         show_prisliste();
 
     }
@@ -391,8 +396,8 @@ function show_prisliste(){
 
     //query the db for all products with category name
     $prisliste_results =  $wpdb->get_results("
-        SELECT p.id, p.category, p.product_name, p.pris, p.picture_url
-        FROM    {$table_name_main} p
+        SELECT id, category, product_name, pris, picture_url, picture_alt_tag
+        FROM    {$table_name_main}
     ", ARRAY_A)or die ( $wpdb->last_error );
 
     //query db for data on ingredients and allergens
@@ -406,37 +411,116 @@ function show_prisliste(){
         FROM    {$table_name_product_allergens}
     ", ARRAY_A)or die ( $wpdb->last_error );
 
-    foreach ($categories as $category) {
-        echo 'Kategori navnet er: '; print($category['category_name']); echo '<br><br>';
-        foreach ($prisliste_results as $product) {
-            if ($category['category_id'] === $product['category']){
-                echo 'Produkt navnet er: '; print($product['product_name']); echo '<br>';
-                foreach ($ingredients as $ingredient) {
-                    if ($product['id'] === $ingredient['product_id']) {
-                        echo 'Ingrediens navnet er: '; print($ingredient['ingredient_name']);
-                        if ($ingredient['allergen'] == 1) {
-                            echo ' som er et allergen. ';
-                        } else {
-                            echo ' som er ikke et allergen. ';
+    //building the html output
+    ?>
+    <div class="prisliste_wrapper">
+        <div><h1 class="hv-header_first">Prisliste</h1></div>
+        <?php
+        foreach ($categories as $category) {
+            ?>
+            <div class='prisliste_category_wrapper'>
+                <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
+                <?php
+                foreach ($prisliste_results as $product) {
+                    if ($category['category_id'] === $product['category']){
+                        ?>
+                        <div class="accordion">
+                            <div class="accordion-thumbnail-div">
+                                <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
+                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
+                                     class="accordion-thumbnail"
+                                />
+                            </div>
+                            <div class="accordion-content"><?php echo esc_html( $product['product_name'] ) ?></div>
+                            <div class="accordion-content"><?php echo esc_html( $product['pris'] ) ?></div>
+                            <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
+                        </div>
+                        <div class="panel">
+                            <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
+                                 alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
+                                 class="accordion-image"
+                            />
+                            <div class="accordion-list">
+                                <h3>Ingredienser</h3>
+                                <ul>
+                                    <li>Elgkjøtt (60%)</li>
+                                    <li>Svinehjerter</li>
+                                    <li>Storfekjøtt</li>
+                                    <li>Svinetunger</li>
+                                    <li>Spekk</li>
+                                    <li>Blod</li>
+                                    <li>Salt</li>
+                                    <li>Krydderblanding (Surhetsregulerende middel (E575), krydder, dekstrose (mais), Smaksforsterker (E621), Antioksidant (E301, E392, E300))</li>
+                                    <li>Bestrålt krydder</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <?php
+
+                        echo 'Produkt navnet er: '; print($product['product_name']); echo '<br>';
+                        foreach ($ingredients as $ingredient) {
+                            if ($product['id'] === $ingredient['product_id']) {
+                                echo 'Ingrediens navnet er: '; print($ingredient['ingredient_name']);
+                                if ($ingredient['allergen'] == 1) {
+                                    echo ' som er et allergen. ';
+                                } else {
+                                    echo ' som er ikke et allergen. ';
+                                }
+                                echo '<br>';
+                            }
                         }
-                        echo '<br>';
+                        echo 'Allergenene i dette produktet er: ';
+                        foreach ($allergens as $allergen) {
+                            if ($product['id'] === $allergen['product_id']) {
+                                print($allergen['allergen_name']); echo ' ';
+                            }
+                        }
+                        echo '<br><br>';
                     }
-
                 }
-                echo 'Allergenene i dette produktet er: ';
-                foreach ($allergens as $allergen) {
-                    if ($product['id'] === $allergen['product_id']) {
-                        print($allergen['allergen_name']); echo ' ';
+                echo '<br>';
+                ?>
+            </div>
+            <?php
 
-                    }
 
-                }
-                echo '<br><br>';
-            }
+
         }
-        echo '<br>';
+        ?>
+    </div>
 
-    }
+
+
+
+<?php
+//    foreach ($categories as $category) {
+//        echo 'Kategori navnet er: '; print($category['category_name']); echo '<br><br>';
+//        foreach ($prisliste_results as $product) {
+//            if ($category['category_id'] === $product['category']){
+//                echo 'Produkt navnet er: '; print($product['product_name']); echo '<br>';
+//                foreach ($ingredients as $ingredient) {
+//                    if ($product['id'] === $ingredient['product_id']) {
+//                        echo 'Ingrediens navnet er: '; print($ingredient['ingredient_name']);
+//                        if ($ingredient['allergen'] == 1) {
+//                            echo ' som er et allergen. ';
+//                        } else {
+//                            echo ' som er ikke et allergen. ';
+//                        }
+//                        echo '<br>';
+//                    }
+//                }
+//                echo 'Allergenene i dette produktet er: ';
+//                foreach ($allergens as $allergen) {
+//                    if ($product['id'] === $allergen['product_id']) {
+//                        print($allergen['allergen_name']); echo ' ';
+//                    }
+//                }
+//                echo '<br><br>';
+//            }
+//        }
+//        echo '<br>';
+//    }
 }
 
 //registrering the shortcode
