@@ -15,7 +15,7 @@ Version: 0.1
 //security check
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-/******  TEMP FUNCTION FOR DEV   ******/
+//function for dropping db when uninstalling
 function prisliste_drop_db() {
     //drop custom database tables
     global $wpdb;
@@ -30,6 +30,7 @@ function prisliste_drop_db() {
     $wpdb->query("DROP TABLE IF EXISTS $table_name_main");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_product_category");
 }
+/******  TEMP FUNCTION FOR DEV, drops the db when deactivating the plugin   ******/
 register_deactivation_hook( __FILE__, 'prisliste_drop_db' );
 
 //loading css
@@ -68,7 +69,7 @@ function load_prisliste_js(){
         wp_enqueue_script('prisliste_script');
     }
 }
-add_action('wp_enqueue_scripts', 'load_prisliste_js_admin');
+add_action('wp_enqueue_scripts', 'load_prisliste_js');
 
 //loading javascript for the plugin adminpage
 function load_prisliste_js_admin($hook){
@@ -429,40 +430,6 @@ function prisliste_update_db_check() {
 }
 add_action( 'plugins_loaded', 'prisliste_update_db_check' );
 
-add_action('admin_menu', 'prisliste_setup_menu');
-
-//code for registrering the plugin with wordpress
-function prisliste_setup_menu() {
-    add_menu_page(
-        'Prisliste Plugin Side',
-        'Prisliste Plugin',
-        'manage_options',
-        'prisliste-plugin',
-        'prisliste_init'
-    );
-
-    //the code that creates the plugin admin page
-    function prisliste_init() {
-        //prisliste_handle_post();
-
-//        global $wpdb;//grabbing the wp database prefix in this install
-//        echo $wpdb->prefix . 'prisliste<br>';
-//        echo $wpdb->prefix . 'prisliste_kategorier<br>';
-//        echo $wpdb->prefix . 'prisliste_produkt_ingredienser<br>';
-//        echo $wpdb->prefix . 'prisliste_produkt_allergener<br>';
-//        echo $wpdb->get_charset_collate() . '<br>';
-//        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
-//        echo '<br>';
-        show_prisliste();
-
-    }
-
-    //processing POST to the plugin page
-    //function prisliste_handle_post() {
-
-    //}
-}
-
 //function for building the html part for frontend page
 function show_prisliste() {
     global $wpdb;
@@ -712,34 +679,41 @@ function show_prisliste_admin() {
     <?php
 }
 
-//    foreach ($categories as $category) {
-//        echo 'Kategori navnet er: '; print($category['category_name']); echo '<br><br>';
-//        foreach ($prisliste_results as $product) {
-//            if ($category['category_id'] === $product['category']){
-//                echo 'Produkt navnet er: '; print($product['product_name']); echo '<br>';
-//                foreach ($ingredients as $ingredient) {
-//                    if ($product['id'] === $ingredient['product_id']) {
-//                        echo 'Ingrediens navnet er: '; print($ingredient['ingredient_name']);
-//                        if ($ingredient['allergen'] == 1) {
-//                            echo ' som er et allergen. ';
-//                        } else {
-//                            echo ' som er ikke et allergen. ';
-//                        }
-//                        echo '<br>';
-//                    }
-//                }
-//                echo 'Allergenene i dette produktet er: ';
-//                foreach ($allergens as $allergen) {
-//                    if ($product['id'] === $allergen['product_id']) {
-//                        print($allergen['allergen_name']); echo ' ';
-//                    }
-//                }
-//                echo '<br><br>';
-//            }
-//        }
-//        echo '<br>';
-//    }
-//}
+//registrering the shortcodes
+add_shortcode('prisliste', 'show_prisliste');
 
-//registrering the shortcode
+
+//code for registrering the plugin with wordpress
+add_action('admin_menu', 'prisliste_setup_menu');
+function prisliste_setup_menu() {
+    add_menu_page(
+        'Prisliste Plugin Side',
+        'Prisliste Plugin',
+        'manage_options',
+        'prisliste-plugin',
+        'prisliste_init'
+    );
+
+    //the code that creates the plugin admin page
+    function prisliste_init() {
+        //prisliste_handle_post();
+
+//        global $wpdb;//grabbing the wp database prefix in this install
+//        echo $wpdb->prefix . 'prisliste<br>';
+//        echo $wpdb->prefix . 'prisliste_kategorier<br>';
+//        echo $wpdb->prefix . 'prisliste_produkt_ingredienser<br>';
+//        echo $wpdb->prefix . 'prisliste_produkt_allergener<br>';
+//        echo $wpdb->get_charset_collate() . '<br>';
+//        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
+//        echo '<br>';
+        show_prisliste_admin();
+
+    }
+
+    //processing POST to the plugin page
+    //function prisliste_handle_post() {
+
+    //}
+}
+
 ?>
