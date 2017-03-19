@@ -706,6 +706,8 @@ function prisliste_setup_menu() {
 //        echo $wpdb->get_charset_collate() . '<br>';
 //        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
 //        echo '<br>';
+
+        //https://www.smashingmagazine.com/2016/04/three-approaches-to-adding-configurable-fields-to-your-plugin/
         show_prisliste_admin();
 
     }
