@@ -29,17 +29,45 @@ function prisliste_drop_db() {
 }
 register_deactivation_hook( __FILE__, 'prisliste_drop_db' );
 
-//loading javascript for users
-//    function load_prisliste_js(){
-//        wp_enqueue_script('prisliste', plugins_url('/js/prisliste.js', __FILE__), array('jquery'));
-//    }
-//    do_action('init', 'load_prisliste_js');
-
-//loading javascript for adminpage
-function load_prisliste_js_admin(){
-    admin_enqueue_script('prisliste', plugins_dir_url(__FILE__) . '/js/prisliste.js', array('jquery'));
+//loading css
+function load_prisliste_css() {
+    wp_register_style( 'load_prisliste_css', plugins_url('/style/prisliste.css', __FILE__) );
+    wp_enqueue_style( 'load_prisliste_css' );
 }
-add_action('init', 'load_prisliste_js_admin');
+add_action( 'wp_enqueue_scripts', 'load_prisliste_css_admin' );
+
+//loading css for the plugin adminpage
+function load_prisliste_css_admin($hook) {
+    // Load only on correct admin page for the plugin
+    if($hook != 'toplevel_page_prisliste-plugin') {
+        return;
+    }
+
+    wp_register_style( 'load_prisliste_css_admin', plugins_url('/style/prisliste.css', __FILE__) );
+    wp_enqueue_style( 'load_prisliste_css_admin' );
+}
+add_action( 'admin_enqueue_scripts', 'load_prisliste_css_admin' );
+
+//loading javascript
+function load_prisliste_js(){
+    wp_register_script( 'prisliste_script', plugins_url( '/js/prisliste.js', __FILE__ ), array( 'jquery' ) );
+    wp_enqueue_script('prisliste_script');
+}
+add_action('wp_enqueue_scripts', 'load_prisliste_js_admin');
+
+//loading javascript for the plugin adminpage
+function load_prisliste_js_admin($hook){
+    // Load only on correct admin page for the plugin
+    if($hook != 'toplevel_page_prisliste-plugin') {
+        return;
+    }
+
+    wp_register_script( 'prisliste_script', plugins_url( '/js/prisliste.js', __FILE__ ), array( 'jquery' ) );
+    wp_enqueue_script('prisliste_script');
+}
+add_action('admin_enqueue_scripts', 'load_prisliste_js_admin');
+
+
 
 //check for security
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );

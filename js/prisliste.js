@@ -2,9 +2,7 @@
  * Created by Sjur on 17.03.2017.
  * Copied from what Jonas had done earlier.
  */
-
 console.log('js is loaded');
-alert('js is loaded');
 
 var acc = document.getElementsByClassName("accordion");
 var i;
