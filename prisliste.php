@@ -116,6 +116,7 @@ function prisliste_install() {
       category mediumint(9) NOT NULL,
       product_name varchar(255) NOT NULL,
       pris mediumint(9) NOT NULL,
+      pris_type boolean NOT NULL DEFAULT 0,
       picture_url varchar(255) DEFAULT '' NOT NULL,
       picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
       PRIMARY KEY  (id),
@@ -169,6 +170,7 @@ function prisliste_install() {
             category mediumint(9) NOT NULL,
             product_name varchar(255) NOT NULL,
             pris mediumint(9) NOT NULL,
+            pris_type boolean NOT NULL DEFAULT 0,
             picture_url varchar(255) DEFAULT '' NOT NULL,
             picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
             PRIMARY KEY  (id),
@@ -230,6 +232,7 @@ function prisliste_install_data() {
             'category' => 1,
             'product_name' => 'Elgstek',
             'pris' => 250,
+            'pris_type' => 0,
             'picture_url' => 'img/eksempel-bilde-1.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 1'
         )
@@ -241,6 +244,7 @@ function prisliste_install_data() {
             'category' => 1,
             'product_name' => 'Hjortestek',
             'pris' => 240,
+            'pris_type' => 0,
             'picture_url' => 'img/eksempel-bilde-2.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 2'
         )
@@ -252,6 +256,7 @@ function prisliste_install_data() {
             'category' => 2,
             'product_name' => 'Elgpølse',
             'pris' => 200,
+            'pris_type' => 1,
             'picture_url' => 'img/eksempel-bilde-3.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 3'
         )
@@ -263,6 +268,7 @@ function prisliste_install_data() {
             'category' => 2,
             'product_name' => 'Plagepølse',
             'pris' => 190,
+            'pris_type' => 1,
             'picture_url' => 'img/eksempel-bilde-4.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 4'
         )
@@ -456,9 +462,9 @@ function prisliste_setup_menu() {
 
     //}
 }
-//function for building the frontend part
-function show_prisliste()
-{
+
+//function for building the html part for frontend page
+function show_prisliste() {
     global $wpdb;
     $categories;
     $prisliste_results;
@@ -477,7 +483,7 @@ function show_prisliste()
 
     //query the db for all products with category name
     $prisliste_results =  $wpdb->get_results("
-        SELECT id, category, product_name, pris, picture_url, picture_alt_tag
+        SELECT id, category, product_name, pris, pris_type, picture_url, picture_alt_tag
         FROM    {$table_name_main}
     ", ARRAY_A)or die ( $wpdb->last_error );
 
@@ -497,23 +503,31 @@ function show_prisliste()
     <div class="prisliste_wrapper">
         <div><h1 class="hv-header_first">Prisliste</h1></div>
         <?php
+        //loop for each category
         foreach ($categories as $category) {
             ?>
             <div class='prisliste_category_wrapper'>
                 <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
                 <?php
+                //loop for processing each product
                 foreach ($prisliste_results as $product) {
                     if ($category['category_id'] === $product['category']){
                         ?>
                         <div class="accordion">
                             <div class="accordion-thumbnail-div">
                                 <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
-                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
+                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
                                      class="accordion-thumbnail"
                                 />
                             </div>
-                            <div class="accordion-content"><?php echo esc_html( $product['product_name'] ) ?></div>
-                            <div class="accordion-content"><?php echo esc_html( $product['pris'] ) ?></div>
+                            <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
+                            <div class="accordion-content"><?php echo esc_html( $product['pris'] );
+                                                                if ( $product['pris_type'] == 0 ) {
+                                                                    echo 'kr/kg';
+                                                                } elseif ($product['pris_type'] == 1) {
+                                                                    echo 'kr/stk';
+                                                                }
+                                                            ?></div>
                             <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
                         </div>
                         <div class="panel">
@@ -526,6 +540,7 @@ function show_prisliste()
                                 <div>
                                     <ul>
                                         <?php
+                                        //loop for building the ingredients list
                                         foreach ($ingredients as $ingredient) {
                                             if ($product['id'] === $ingredient['product_id']) {
                                                 echo '<li>';
@@ -544,6 +559,7 @@ function show_prisliste()
                                 </div>
                                 <div>
                                     <?php
+                                    //loop for showing allergens, if the product has any
                                     $count=0;
                                     foreach ($allergens as $allergen) {
                                         if ($product['id'] === $allergen['product_id']) {
@@ -556,6 +572,132 @@ function show_prisliste()
                                     }
                                     ?>
                                 </div>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                }
+                ?>
+            </div>
+            <?php
+        }
+        ?>
+    </div>
+    <?php
+}
+
+//function for building the html part for admin page
+function show_prisliste_admin() {
+    global $wpdb;
+    $categories;
+    $prisliste_results;
+    $ingredients;
+    $allergens;
+    $prisliste_full_arr;
+
+    $table_name_main = $wpdb->prefix . "prisliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
+    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+
+    //query the db for categories
+    $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A)
+    or die ( $wpdb->last_error );
+
+    //query the db for all products with category name
+    $prisliste_results =  $wpdb->get_results("
+        SELECT id, category, product_name, pris, pris_type, picture_url, picture_alt_tag
+        FROM    {$table_name_main}
+    ", ARRAY_A)or die ( $wpdb->last_error );
+
+    //query db for data on ingredients and allergens
+    $ingredients = $wpdb->get_results("
+        SELECT product_id, ingredient_name, allergen
+        FROM    {$table_name_product_ingredients}
+    ", ARRAY_A)or die ( $wpdb->last_error );
+
+    $allergens = $wpdb->get_results("
+        SELECT product_id, allergen_name
+        FROM    {$table_name_product_allergens}
+    ", ARRAY_A)or die ( $wpdb->last_error );
+
+    //building the html output
+    ?>
+    <div class="prisliste_wrapper">
+        <div><h1 class="hv-header_first">Prisliste</h1></div>
+        <?php
+        //loop for each category
+        foreach ($categories as $category) {
+            ?>
+            <div class='prisliste_category_wrapper'>
+                <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
+                <?php
+                //loop for processing each product
+                foreach ($prisliste_results as $product) {
+                    if ($category['category_id'] === $product['category']){
+                        ?>
+                        <div class="accordion">
+                            <div class="accordion-thumbnail-div">
+                                <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
+                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
+                                     class="accordion-thumbnail"
+                                />
+                            </div>
+                            <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
+                            <div class="accordion-content"><?php echo esc_html( $product['pris'] );
+                                if ( $product['pris_type'] == 0 ) {
+                                    echo 'kr/kg';
+                                } elseif ($product['pris_type'] == 1) {
+                                    echo 'kr/stk';
+                                }
+                                ?></div>
+                            <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
+                        </div>
+                        <div class="panel">
+                            <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
+                                 alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
+                                 class="accordion-image"
+                            />
+                            <div class="accordion-list">
+                                <div><h3>Ingredienser</h3></div>
+                                <div>
+                                    <ul>
+                                        <?php
+                                        //loop for building the ingredients list
+                                        foreach ($ingredients as $ingredient) {
+                                            if ($product['id'] === $ingredient['product_id']) {
+                                                echo '<li>';
+                                                if ( $ingredient['allergen'] == 1 ) {
+                                                    echo '<b>';
+                                                    echo esc_html( $ingredient['ingredient_name'] );
+                                                    echo '</b>';
+                                                } else {
+                                                    echo esc_html( $ingredient['ingredient_name'] );
+                                                }
+                                                echo '</li>';
+                                            }
+                                        }
+                                        ?>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <?php
+                                    //loop for showing allergens, if the product has any
+                                    $count=0;
+                                    foreach ($allergens as $allergen) {
+                                        if ($product['id'] === $allergen['product_id']) {
+                                            if ($count == 0){
+                                                echo '<h3>Allergier</h3>';
+                                                $count++;
+                                            }
+                                            echo esc_html( $allergen['allergen_name'] ) . ' ';
+                                        }
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- TODO: add the buttons for the delete and edit options to each product -->
                             </div>
                         </div>
                         <?php
