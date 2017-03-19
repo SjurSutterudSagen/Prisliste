@@ -12,6 +12,9 @@ Version: 0.1
  * https://codex.wordpress.org/Shortcode_API
  *****/
 
+//security check
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
 /******  TEMP FUNCTION FOR DEV   ******/
 function prisliste_drop_db() {
     //drop custom database tables
@@ -31,8 +34,10 @@ register_deactivation_hook( __FILE__, 'prisliste_drop_db' );
 
 //loading css
 function load_prisliste_css() {
-    wp_register_style( 'load_prisliste_css', plugins_url('/style/prisliste.css', __FILE__) );
-    wp_enqueue_style( 'load_prisliste_css' );
+    if (!is_admin()) {
+        wp_register_style( 'load_prisliste_css', plugins_url('/style/prisliste.css', __FILE__) );
+        wp_enqueue_style( 'load_prisliste_css' );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'load_prisliste_css_admin' );
 
@@ -50,8 +55,10 @@ add_action( 'admin_enqueue_scripts', 'load_prisliste_css_admin' );
 
 //loading javascript
 function load_prisliste_js(){
-    wp_register_script( 'prisliste_script', plugins_url( '/js/prisliste.js', __FILE__ ), array( 'jquery' ) );
-    wp_enqueue_script('prisliste_script');
+    if (!is_admin()) {
+        wp_register_script( 'prisliste_script', plugins_url( '/js/prisliste.js', __FILE__ ), array( 'jquery' ) );
+        wp_enqueue_script('prisliste_script');
+    }
 }
 add_action('wp_enqueue_scripts', 'load_prisliste_js_admin');
 
@@ -67,10 +74,6 @@ function load_prisliste_js_admin($hook){
 }
 add_action('admin_enqueue_scripts', 'load_prisliste_js_admin');
 
-
-
-//check for security
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 //DB versioning
 global $prisliste_db_version;
