@@ -37,9 +37,13 @@ function load_prisliste_css() {
     if (!is_admin()) {
         wp_register_style( 'load_prisliste_css', plugins_url('/style/prisliste.css', __FILE__) );
         wp_enqueue_style( 'load_prisliste_css' );
+
+        //enqueueing font awsome
+        wp_register_style( 'load_font_awsome_min_css', plugins_url('/font-awesome-4.7.0/css/font-awesome.min.css', __FILE__) );
+        wp_enqueue_style( 'load_font_awsome_min_css' );
     }
 }
-add_action( 'wp_enqueue_scripts', 'load_prisliste_css_admin' );
+add_action( 'wp_enqueue_scripts', 'load_prisliste_css' );
 
 //loading css for the plugin adminpage
 function load_prisliste_css_admin($hook) {
@@ -50,6 +54,10 @@ function load_prisliste_css_admin($hook) {
 
     wp_register_style( 'load_prisliste_css_admin', plugins_url('/style/prisliste.css', __FILE__) );
     wp_enqueue_style( 'load_prisliste_css_admin' );
+
+    //enqueueing font awsome
+    wp_register_style( 'load_font_awsome_min_css', plugins_url('/font-awesome-4.7.0/css/font-awesome.min.css', __FILE__) );
+    wp_enqueue_style( 'load_font_awsome_min_css' );
 }
 add_action( 'admin_enqueue_scripts', 'load_prisliste_css_admin' );
 
@@ -417,6 +425,7 @@ add_action( 'plugins_loaded', 'prisliste_update_db_check' );
 
 add_action('admin_menu', 'prisliste_setup_menu');
 
+//code for registrering the plugin with wordpress
 function prisliste_setup_menu() {
     add_menu_page(
         'Prisliste Plugin Side',
@@ -426,6 +435,7 @@ function prisliste_setup_menu() {
         'prisliste_init'
     );
 
+    //the code that creates the plugin admin page
     function prisliste_init() {
         //prisliste_handle_post();
 
@@ -441,6 +451,7 @@ function prisliste_setup_menu() {
 
     }
 
+    //processing POST to the plugin page
     //function prisliste_handle_post() {
 
     //}
