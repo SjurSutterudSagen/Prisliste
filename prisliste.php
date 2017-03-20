@@ -3,7 +3,7 @@
 Plugin Name: Prisliste
 Description: En prisliste plugin for Hadeland Viltslakteri
 Author: Sjur Sutterud Sagen
-Version: 0.1
+Version: 0.2
 */
 
 /*****
@@ -12,7 +12,7 @@ Version: 0.1
  * https://codex.wordpress.org/Shortcode_API
  *****/
 
-//security check
+//security check for XSS attack
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 //function for dropping db when uninstalling
@@ -86,7 +86,7 @@ add_action('admin_enqueue_scripts', 'load_prisliste_js_admin');
 
 //DB versioning
 global $prisliste_db_version;
-$prisliste_db_version = "1.1";
+$prisliste_db_version = "1.2";
 
 //Function for creating the DB tables on plugin activation
 function prisliste_install() {
@@ -116,8 +116,8 @@ function prisliste_install() {
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       category mediumint(9) NOT NULL,
       product_name varchar(255) NOT NULL,
-      pris mediumint(9) NOT NULL,
-      pris_type boolean NOT NULL DEFAULT 0,
+      price mediumint(9) NOT NULL,
+      price_type boolean NOT NULL DEFAULT 0,
       picture_url varchar(255) DEFAULT '' NOT NULL,
       picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
       PRIMARY KEY  (id),
@@ -170,8 +170,8 @@ function prisliste_install() {
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             category mediumint(9) NOT NULL,
             product_name varchar(255) NOT NULL,
-            pris mediumint(9) NOT NULL,
-            pris_type boolean NOT NULL DEFAULT 0,
+            price mediumint(9) NOT NULL,
+            price_type boolean NOT NULL DEFAULT 0,
             picture_url varchar(255) DEFAULT '' NOT NULL,
             picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
             PRIMARY KEY  (id),
@@ -232,8 +232,8 @@ function prisliste_install_data() {
         array(
             'category' => 1,
             'product_name' => 'Elgstek',
-            'pris' => 250,
-            'pris_type' => 0,
+            'price' => 250,
+            'price_type' => 0,
             'picture_url' => 'img/eksempel-bilde-1.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 1'
         )
@@ -244,8 +244,8 @@ function prisliste_install_data() {
         array(
             'category' => 1,
             'product_name' => 'Hjortestek',
-            'pris' => 240,
-            'pris_type' => 0,
+            'price' => 240,
+            'price_type' => 0,
             'picture_url' => 'img/eksempel-bilde-2.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 2'
         )
@@ -256,8 +256,8 @@ function prisliste_install_data() {
         array(
             'category' => 2,
             'product_name' => 'Elgpølse',
-            'pris' => 200,
-            'pris_type' => 1,
+            'price' => 200,
+            'price_type' => 1,
             'picture_url' => 'img/eksempel-bilde-3.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 3'
         )
@@ -268,8 +268,8 @@ function prisliste_install_data() {
         array(
             'category' => 2,
             'product_name' => 'Plagepølse',
-            'pris' => 190,
-            'pris_type' => 1,
+            'price' => 190,
+            'price_type' => 1,
             'picture_url' => 'img/eksempel-bilde-4.png',
             'picture_alt_tag' => 'Kort om bildet til produkt 4'
         )
@@ -591,7 +591,7 @@ function show_prisliste_admin() {
     //building the html output
     ?>
     <div class="prisliste_wrapper">
-        <div><h1 class="hv-header_first">Prisliste</h1></div>
+        <div><h2 class="hv-header_first">Eksisterende produkter i Prislisten</h2></div>
         <?php
         //loop for each category
         foreach ($categories as $category) {
@@ -686,17 +686,45 @@ add_shortcode('prisliste', 'show_prisliste');
 //code for registrering the plugin with wordpress
 add_action('admin_menu', 'prisliste_setup_menu');
 function prisliste_setup_menu() {
-    add_menu_page(
-        'Prisliste Plugin Side',
-        'Prisliste Plugin',
-        'manage_options',
-        'prisliste-plugin',
-        'prisliste_init'
-    );
+    //processing POST to the plugin page
+    function prisliste_handle_post() {
+
+    }
 
     //the code that creates the plugin admin page
     function prisliste_init() {
-        //prisliste_handle_post();
+        prisliste_handle_post();
+
+        //fetching the categories from the db
+
+
+        ?>
+        <div class="wrap">
+            <div>
+                <h1>Administrator side for Prisliste plugin</h1>
+            </div>
+            <div class="form_wrapper_category">
+                <h2>Forandre kategori navn</h2>
+                <form method="POST">
+                    <div>
+                        <label for="selCat">Velg Kategori</label>
+                        <select class="form-control" name="category" id="selCat">
+                            <?php category_selects($categories, $cat); ?>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="form_wrapper_product">
+                <h2>Legg til nytt produkt</h2>
+                <form method="POST" enctype="multipart/form-data">
+
+                </form>
+            </div>
+        </div>
+
+        <?php
+
+        show_prisliste_admin();
 
 //        global $wpdb;//grabbing the wp database prefix in this install
 //        echo $wpdb->prefix . 'prisliste<br>';
@@ -706,16 +734,18 @@ function prisliste_setup_menu() {
 //        echo $wpdb->get_charset_collate() . '<br>';
 //        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
 //        echo '<br>';
-
         //https://www.smashingmagazine.com/2016/04/three-approaches-to-adding-configurable-fields-to-your-plugin/
-        show_prisliste_admin();
+
 
     }
 
-    //processing POST to the plugin page
-    //function prisliste_handle_post() {
-
-    //}
+    add_menu_page(
+        'Prisliste Plugin Side',
+        'Prisliste Plugin',
+        'manage_options',
+        'prisliste-plugin',
+        'prisliste_init'
+    );
 }
 
 ?>
