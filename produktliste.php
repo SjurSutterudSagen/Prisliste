@@ -1,7 +1,7 @@
 <?php
 /*
-Plugin Name: Prisliste
-Description: En prisliste plugin for Hadeland Viltslakteri
+Plugin Name: Produktliste
+Description: En produktliste plugin for Hadeland Viltslakteri
 Author: Sjur Sutterud Sagen
 Version: 0.2
 */
@@ -16,91 +16,88 @@ Version: 0.2
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 //function for dropping db when uninstalling
-function prisliste_drop_db() {
+function produktliste_drop_db() {
     //drop custom database tables
     global $wpdb;
 
-    $table_name_main = $wpdb->prefix . "prisliste_produkter";
-    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
-    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
-    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+    $table_name_main = $wpdb->prefix . "produktliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
     $wpdb->query("DROP TABLE IF EXISTS $table_name_product_ingredients");
-    $wpdb->query("DROP TABLE IF EXISTS $table_name_product_allergens");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_main");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_product_category");
 }
 /******  TEMP FUNCTION FOR DEV, drops the db when deactivating the plugin   ******/
-register_deactivation_hook( __FILE__, 'prisliste_drop_db' );
+register_deactivation_hook( __FILE__, 'produktliste_drop_db' );
 
 //loading css
-function load_prisliste_css() {
+function load_produktliste_css() {
     if (!is_admin()) {
-        wp_register_style( 'load_prisliste_css', plugins_url('/style/prisliste.css', __FILE__) );
-        wp_enqueue_style( 'load_prisliste_css' );
+        wp_register_style( 'load_produktliste_css', plugins_url('/style/produktliste.css', __FILE__) );
+        wp_enqueue_style( 'load_produktliste_css' );
 
         //enqueueing font awsome
         wp_register_style( 'load_font_awsome_min_css', plugins_url('/font-awesome-4.7.0/css/font-awesome.min.css', __FILE__) );
         wp_enqueue_style( 'load_font_awsome_min_css' );
     }
 }
-add_action( 'wp_enqueue_scripts', 'load_prisliste_css' );
+add_action( 'wp_enqueue_scripts', 'load_produktliste_css' );
 
 //loading css for the plugin adminpage
-function load_prisliste_css_admin($hook) {
+function load_produktliste_css_admin($hook) {
     // Load only on correct admin page for the plugin
-    if($hook != 'toplevel_page_prisliste-plugin') {
+    if($hook != 'toplevel_page_produktliste-plugin') {
         return;
     }
 
-    wp_register_style( 'load_prisliste_css_admin', plugins_url('/style/prisliste.css', __FILE__) );
-    wp_enqueue_style( 'load_prisliste_css_admin' );
+    wp_register_style( 'load_produktliste_css_admin', plugins_url('/style/produktliste.css', __FILE__) );
+    wp_enqueue_style( 'load_produktliste_css_admin' );
 
     //enqueueing font awsome
     wp_register_style( 'load_font_awsome_min_css', plugins_url('/font-awesome-4.7.0/css/font-awesome.min.css', __FILE__) );
     wp_enqueue_style( 'load_font_awsome_min_css' );
 }
-add_action( 'admin_enqueue_scripts', 'load_prisliste_css_admin' );
+add_action( 'admin_enqueue_scripts', 'load_produktliste_css_admin' );
 
 //loading javascript
-function load_prisliste_js(){
+function load_produktliste_js(){
     if (!is_admin()) {
-        wp_register_script( 'prisliste_script', plugins_url( '/js/prisliste.js', __FILE__ ), array( 'jquery' ) );
-        wp_enqueue_script('prisliste_script');
+        wp_register_script( 'produktliste_script', plugins_url( '/js/produktliste.js', __FILE__ ), array( 'jquery' ) );
+        wp_enqueue_script('produktliste_script');
     }
 }
-add_action('wp_enqueue_scripts', 'load_prisliste_js');
+add_action('wp_enqueue_scripts', 'load_produktliste_js');
 
 //loading javascript for the plugin adminpage
-function load_prisliste_js_admin($hook){
+function load_produktliste_js_admin($hook){
     // Load only on correct admin page for the plugin
-    if($hook != 'toplevel_page_prisliste-plugin') {
+    if($hook != 'toplevel_page_produktliste-plugin') {
         return;
     }
 
-    wp_register_script( 'prisliste_script', plugins_url( '/js/prisliste.js', __FILE__ ), array( 'jquery' ) );
-    wp_enqueue_script('prisliste_script');
+    wp_register_script( 'produktliste_script', plugins_url( '/js/produktliste.js', __FILE__ ), array( 'jquery' ) );
+    wp_enqueue_script('produktliste_script');
 }
-add_action('admin_enqueue_scripts', 'load_prisliste_js_admin');
+add_action('admin_enqueue_scripts', 'load_produktliste_js_admin');
 
 
 //DB versioning
-global $prisliste_db_version;
-$prisliste_db_version = "1.2";
+global $produktliste_db_version;
+$produktliste_db_version = "1.2";
 
 //Function for creating the DB tables on plugin activation
-function prisliste_install() {
+function produktliste_install() {
 
     global $wpdb;
-    global $prisliste_db_version;
+    global $produktliste_db_version;
 
     //loading library for dbDelta function
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php');
 
-    $table_name_main = $wpdb->prefix . "prisliste_produkter";
-    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
-    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
-    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+    $table_name_main = $wpdb->prefix . "produktliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
     $charset_collate = $wpdb->get_charset_collate();
 
     //SQL queries and tables creation
@@ -125,15 +122,6 @@ function prisliste_install() {
     ) $charset_collate;";
     dbDelta($sql);
 
-    $sql = "CREATE TABLE $table_name_product_allergens (
-      id mediumint(9) NOT NULL AUTO_INCREMENT,
-      product_id mediumint(9) NOT NULL,
-      allergen_name varchar(255) NOT NULL,
-      PRIMARY KEY  (id),
-      FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
-    ) $charset_collate;";
-    dbDelta($sql);
-
     $sql = "CREATE TABLE $table_name_product_ingredients (
       id mediumint(9) NOT NULL AUTO_INCREMENT,
       product_id mediumint(9) NOT NULL,
@@ -143,16 +131,15 @@ function prisliste_install() {
       FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
     ) $charset_collate;";
     dbDelta($sql);
-    add_option( 'prisliste_db_version', $prisliste_db_version );
+    add_option( 'produktliste_db_version', $produktliste_db_version );
 
     //updating and modifying the db for a new version
-    $installed_version = get_option( "prisliste_db_version" );
-    if( $installed_version != $prisliste_db_version ){
+    $installed_version = get_option( "produktliste_db_version" );
+    if( $installed_version != $produktliste_db_version ){
 
-        $table_name_main = $wpdb->prefix . "prisliste";
-        $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
-        $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
-        $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+        $table_name_main = $wpdb->prefix . "produktliste";
+        $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+        $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
         $charset_collate = $wpdb->get_charset_collate();
 
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -179,15 +166,6 @@ function prisliste_install() {
         ) $charset_collate;";
         dbDelta($sql);
 
-        $sql = "CREATE TABLE $table_name_product_allergens (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            product_id mediumint(9) NOT NULL,
-            allergen_name varchar(255) NOT NULL,
-            PRIMARY KEY  (id),
-            FOREIGN KEY  (product_id) REFERENCES $table_name_main(id)
-        ) $charset_collate;";
-        dbDelta($sql);
-
         $sql = "CREATE TABLE $table_name_product_ingredients (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             product_id mediumint(9) NOT NULL,
@@ -198,18 +176,17 @@ function prisliste_install() {
         ) $charset_collate;";
         dbDelta($sql);
 
-        update_option( 'prisliste_db_version', $prisliste_db_version );
+        update_option( 'produktliste_db_version', $produktliste_db_version );
     }
 }
 
 //function for creating 2 dummy items in 2 dummy categories
-function prisliste_install_data() {
+function produktliste_install_data() {
     global $wpdb;
 
-    $table_name_main = $wpdb->prefix . "prisliste_produkter";
-    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
-    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
-    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+    $table_name_main = $wpdb->prefix . "produktliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
     //category table
     $wpdb->insert(
@@ -374,83 +351,40 @@ function prisliste_install_data() {
             'allergen' => 1
         )
     );
-
-    //allergens table
-    $wpdb->insert(
-        $table_name_product_allergens,
-        array(
-            'product_id' => 2,
-            'allergen_name' => 'Nøtteallergi'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_allergens,
-        array(
-            'product_id' => 3,
-            'allergen_name' => 'Nøtteallergi'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_allergens,
-        array(
-            'product_id' => 4,
-            'allergen_name' => 'Nøtteallergi'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_allergens,
-        array(
-            'product_id' => 4,
-            'allergen_name' => 'Melkeallergi'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_allergens,
-        array(
-            'product_id' => 4,
-            'allergen_name' => 'Pollenallergi'
-        )
-    );
 }
 
 //creating the db when plugin is activated
-register_activation_hook( __FILE__, 'prisliste_install' );
-register_activation_hook( __FILE__, 'prisliste_install_data' );
+register_activation_hook( __FILE__, 'produktliste_install' );
+register_activation_hook( __FILE__, 'produktliste_install_data' );
 
 //update check on the db for new plugin version
-function prisliste_update_db_check() {
-    global $prisliste_db_version;
-    if (get_site_option( 'prisliste_db_version' ) != $prisliste_db_version ) {
-        prisliste_install();
+function produktliste_update_db_check() {
+    global $produktliste_db_version;
+    if (get_site_option( 'produktliste_db_version' ) != $produktliste_db_version ) {
+        produktliste_install();
     }
 }
-add_action( 'plugins_loaded', 'prisliste_update_db_check' );
+add_action( 'plugins_loaded', 'produktliste_update_db_check' );
 
 //function for building the html part for frontend page
-function show_prisliste() {
+function show_produktliste() {
     global $wpdb;
     $categories;
-    $prisliste_results;
+    $produktliste_results;
     $ingredients;
-    $allergens;
-    $prisliste_full_arr;
+    $produktliste_full_arr;
 
-    $table_name_main = $wpdb->prefix . "prisliste_produkter";
-    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
-    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
-    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+    $table_name_main = $wpdb->prefix . "produktliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
     //query the db for categories
     $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A)
                     or die ( $wpdb->last_error );
 
     //query the db for all products with category name
-    $prisliste_results =  $wpdb->get_results("
-        SELECT id, category, product_name, pris, pris_type, picture_url, picture_alt_tag
+    $produktliste_results =  $wpdb->get_results("
+        SELECT id, category, product_name, price, price_type, picture_url, picture_alt_tag
         FROM    {$table_name_main}
     ", ARRAY_A)or die ( $wpdb->last_error );
 
@@ -460,24 +394,19 @@ function show_prisliste() {
         FROM    {$table_name_product_ingredients}
     ", ARRAY_A)or die ( $wpdb->last_error );
 
-    $allergens = $wpdb->get_results("
-        SELECT product_id, allergen_name
-        FROM    {$table_name_product_allergens}
-    ", ARRAY_A)or die ( $wpdb->last_error );
-
     //building the html output
     ?>
-    <div class="prisliste_wrapper">
-        <div><h1 class="hv-header_first">Prisliste</h1></div>
+    <div class="produktliste_wrapper">
+        <div><h1 class="hv-header_first">Produkter</h1></div>
         <?php
         //loop for each category
         foreach ($categories as $category) {
             ?>
-            <div class='prisliste_category_wrapper'>
+            <div class='produktliste_category_wrapper'>
                 <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
                 <?php
                 //loop for processing each product
-                foreach ($prisliste_results as $product) {
+                foreach ($produktliste_results as $product) {
                     if ($category['category_id'] === $product['category']){
                         ?>
                         <div class="accordion">
@@ -524,21 +453,6 @@ function show_prisliste() {
                                         ?>
                                     </ul>
                                 </div>
-                                <div>
-                                    <?php
-                                    //loop for showing allergens, if the product has any
-                                    $count=0;
-                                    foreach ($allergens as $allergen) {
-                                        if ($product['id'] === $allergen['product_id']) {
-                                            if ($count == 0){
-                                                echo '<h3>Allergier</h3>';
-                                                $count++;
-                                            }
-                                            echo esc_html( $allergen['allergen_name'] ) . ' ';
-                                        }
-                                    }
-                                    ?>
-                                </div>
                             </div>
                         </div>
                         <?php
@@ -554,25 +468,23 @@ function show_prisliste() {
 }
 
 //function for building the html part for admin page
-function show_prisliste_admin() {
+function show_produktliste_admin() {
     global $wpdb;
     $categories;
-    $prisliste_results;
+    $produktliste_results;
     $ingredients;
-    $allergens;
-    $prisliste_full_arr;
+    $produktliste_full_arr;
 
-    $table_name_main = $wpdb->prefix . "prisliste_produkter";
-    $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
-    $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
-    $table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
+    $table_name_main = $wpdb->prefix . "produktliste_produkter";
+    $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+    $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
     //query the db for categories
     $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A)
     or die ( $wpdb->last_error );
 
     //query the db for all products with category name
-    $prisliste_results =  $wpdb->get_results("
+    $produktliste_results =  $wpdb->get_results("
         SELECT id, category, product_name, pris, pris_type, picture_url, picture_alt_tag
         FROM    {$table_name_main}
     ", ARRAY_A)or die ( $wpdb->last_error );
@@ -583,24 +495,19 @@ function show_prisliste_admin() {
         FROM    {$table_name_product_ingredients}
     ", ARRAY_A)or die ( $wpdb->last_error );
 
-    $allergens = $wpdb->get_results("
-        SELECT product_id, allergen_name
-        FROM    {$table_name_product_allergens}
-    ", ARRAY_A)or die ( $wpdb->last_error );
-
     //building the html output
     ?>
-    <div class="prisliste_wrapper">
-        <div><h2 class="hv-header_first">Eksisterende produkter i Prislisten</h2></div>
+    <div class="produktliste_wrapper">
+        <div><h2 class="hv-header_first">Eksisterende produkter i Produktlisten</h2></div>
         <?php
         //loop for each category
         foreach ($categories as $category) {
             ?>
-            <div class='prisliste_category_wrapper'>
+            <div class='produktliste_category_wrapper'>
                 <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
                 <?php
                 //loop for processing each product
-                foreach ($prisliste_results as $product) {
+                foreach ($produktliste_results as $product) {
                     if ($category['category_id'] === $product['category']){
                         ?>
                         <div class="accordion">
@@ -647,21 +554,6 @@ function show_prisliste_admin() {
                                         ?>
                                     </ul>
                                 </div>
-                                <div>
-                                    <?php
-                                    //loop for showing allergens, if the product has any
-                                    $count=0;
-                                    foreach ($allergens as $allergen) {
-                                        if ($product['id'] === $allergen['product_id']) {
-                                            if ($count == 0){
-                                                echo '<h3>Allergier</h3>';
-                                                $count++;
-                                            }
-                                            echo esc_html( $allergen['allergen_name'] ) . ' ';
-                                        }
-                                    }
-                                    ?>
-                                </div>
                             </div>
                             <div>
                                 <!-- TODO: add the buttons for the delete and edit options to each product -->
@@ -680,20 +572,20 @@ function show_prisliste_admin() {
 }
 
 //registrering the shortcodes
-add_shortcode('prisliste', 'show_prisliste');
+add_shortcode('produktliste', 'show_produktliste');
 
 
 //code for registrering the plugin with wordpress
-add_action('admin_menu', 'prisliste_setup_menu');
-function prisliste_setup_menu() {
+add_action('admin_menu', 'produktliste_setup_menu');
+function produktliste_setup_menu() {
     //processing POST to the plugin page
-    function prisliste_handle_post() {
+    function produktliste_handle_post() {
 
     }
 
     //the code that creates the plugin admin page
-    function prisliste_init() {
-        prisliste_handle_post();
+    function produktliste_init() {
+        produktliste_handle_post();
 
         //fetching the categories from the db
 
@@ -701,7 +593,7 @@ function prisliste_setup_menu() {
         ?>
         <div class="wrap">
             <div>
-                <h1>Administrator side for Prisliste plugin</h1>
+                <h1>Administrator side for Produktliste plugin</h1>
             </div>
             <div class="form_wrapper_category">
                 <h2>Forandre kategori navn</h2>
@@ -724,13 +616,12 @@ function prisliste_setup_menu() {
 
         <?php
 
-        show_prisliste_admin();
+        show_produktliste_admin();
 
 //        global $wpdb;//grabbing the wp database prefix in this install
-//        echo $wpdb->prefix . 'prisliste<br>';
-//        echo $wpdb->prefix . 'prisliste_kategorier<br>';
-//        echo $wpdb->prefix . 'prisliste_produkt_ingredienser<br>';
-//        echo $wpdb->prefix . 'prisliste_produkt_allergener<br>';
+//        echo $wpdb->prefix . 'produktliste<br>';
+//        echo $wpdb->prefix . 'produktliste_kategorier<br>';
+//        echo $wpdb->prefix . 'produktliste_produkt_ingredienser<br>';
 //        echo $wpdb->get_charset_collate() . '<br>';
 //        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
 //        echo '<br>';
@@ -740,11 +631,11 @@ function prisliste_setup_menu() {
     }
 
     add_menu_page(
-        'Prisliste Plugin Side',
-        'Prisliste Plugin',
+        'Produktliste Plugin Side',
+        'Produktliste Plugin',
         'manage_options',
-        'prisliste-plugin',
-        'prisliste_init'
+        'produktliste-plugin',
+        'produktliste_init'
     );
 }
 
