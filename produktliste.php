@@ -417,10 +417,10 @@ function show_produktliste() {
                                 />
                             </div>
                             <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
-                            <div class="accordion-content"><?php echo esc_html( $product['pris'] );
-                                                                if ( $product['pris_type'] == 0 ) {
+                            <div class="accordion-content"><?php echo esc_html( $product['price'] );
+                                                                if ( $product['price_type'] == 0 ) {
                                                                     echo 'kr/kg';
-                                                                } elseif ($product['pris_type'] == 1) {
+                                                                } elseif ($product['price_type'] == 1) {
                                                                     echo 'kr/stk';
                                                                 }
                                                             ?></div>
@@ -485,7 +485,7 @@ function show_produktliste_admin() {
 
     //query the db for all products with category name
     $produktliste_results =  $wpdb->get_results("
-        SELECT id, category, product_name, pris, pris_type, picture_url, picture_alt_tag
+        SELECT id, category, product_name, price, price_type, picture_url, picture_alt_tag
         FROM    {$table_name_main}
     ", ARRAY_A)or die ( $wpdb->last_error );
 
@@ -518,10 +518,10 @@ function show_produktliste_admin() {
                                 />
                             </div>
                             <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
-                            <div class="accordion-content"><?php echo esc_html( $product['pris'] );
-                                if ( $product['pris_type'] == 0 ) {
+                            <div class="accordion-content"><?php echo esc_html( $product['price'] );
+                                if ( $product['price_type'] == 0 ) {
                                     echo 'kr/kg';
-                                } elseif ($product['pris_type'] == 1) {
+                                } elseif ($product['price_type'] == 1) {
                                     echo 'kr/stk';
                                 }
                                 ?></div>
@@ -580,35 +580,69 @@ add_action('admin_menu', 'produktliste_setup_menu');
 function produktliste_setup_menu() {
     //processing POST to the plugin page
     function produktliste_handle_post() {
-
+        if(
+            ! isset( $_POST['produktliste_form'] ) ||
+            ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
+        ){ ?>
+            <div class="error">
+                <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
+            </div> <?php
+            exit;
+        } else {
+            // Handle our form data
+        }
     }
 
     //the code that creates the plugin admin page
     function produktliste_init() {
-        produktliste_handle_post();
+
 
         //fetching the categories from the db
 
-
+        //Checking for 'updated' to process the form on POST
+        if( $_POST['updated'] === 'true' ){
+            produktliste_handle_post();
+        }
         ?>
         <div class="wrap">
             <div>
                 <h1>Administrator side for Produktliste plugin</h1>
             </div>
-            <div class="form_wrapper_category">
-                <h2>Forandre kategori navn</h2>
-                <form method="POST">
-                    <div>
-                        <label for="selCat">Velg Kategori</label>
-                        <select class="form-control" name="category" id="selCat">
-                            <?php category_selects($categories, $cat); ?>
-                        </select>
-                    </div>
-                </form>
-            </div>
+
+            <!-- TODO: Legg til kategori valg. Legg til ny/Oppdaternavn/Slett Form -->
+<!--            <div class="form_wrapper_category">-->
+<!--                <h2>Forandre kategori navn</h2>-->
+<!--                <form method="POST">-->
+<!--                    <div>-->
+<!--                        <label for="selCat">Velg Kategori</label>-->
+<!--                        <select class="form-control" name="category" id="selCat">-->
+<!--                            --><?php //category_selects($categories, $cat); ?>
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--            </div>-->
+
+            <!-- TODO: Nytt produkt Form -->
             <div class="form_wrapper_product">
                 <h2>Legg til nytt produkt</h2>
                 <form method="POST" enctype="multipart/form-data">
+                    <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' ); ?>
+                    <table class="form-table">
+                        <tbody>
+                        <tr>
+                            <th><label for="username">Username</label></th>
+                            <td><input name="username" id="username" type="text" value="" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <th><label for="email">Email Address</label></th>
+                            <td><input name="email" id="email" type="text" value="" class="regular-text" /></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p class="submit">
+                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Check My Info!">
+                    </p>
+                </form>
 
                 </form>
             </div>
