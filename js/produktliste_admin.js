@@ -4,9 +4,8 @@
  */
 (function( $ ) {
     "use strict";
-    $(document).ready( function(){
-        console.log('js is loaded');
-
+    $(document).ready(function(){
+        //accordian functionality
         var acc = document.getElementsByClassName("accordion");
         var i;
 
@@ -42,6 +41,21 @@
             }
         }
 
-    } );
-
+        //ingredients buttons functionality
+        var count = 0;
+        if ( $( ".productlist_ingredient" ).length !== 0 ) {
+            count = $( ".productlist_ingredient" ).length;
+        }
+        $( '#new_ingredient' ).click(function(){
+            count++;
+            //inserting the new inputs before the new ingredients button
+            $(
+                "<tr>" +
+                "<th><label for='ingredient[" + count + "]'>Ingrediens " + count + "</label></th>" +
+                "<td><input name='ingredient[" + count + "][" + 'ingredient_name' + "]' type='text' value='' class='regular-text' /></td>" +
+                "<td><input name='ingredient[" + count + "][" + 'ingredient_allergen' + "]' type='checkbox' value='true' class='regular-text' /></td>" +
+                "</tr>"
+            ).insertBefore( '#ingredients_wrapper' );
+        });
+    });
 })(jQuery);
