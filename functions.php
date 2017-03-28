@@ -554,7 +554,7 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
 
 function show_adminpage_forms($categories, $post_values) {
     ?>
-    <div class="wrap">
+    <div>
         <div>
             <h1>Administrator side for Produktliste plugin</h1>
         </div>
@@ -591,7 +591,7 @@ function show_adminpage_forms($categories, $post_values) {
                     echo '<input type="hidden" name="editing_status" value="false" />';
                 }
                 ?>
-                <table class="form-table">
+                <table> <!-- TODO: check if needed for styling:  class="form-table" -->
                     <tbody>
                         <tr>
                             <th><label for="productname">Produktnavn</label></th>
@@ -642,6 +642,13 @@ function show_adminpage_forms($categories, $post_values) {
                             </td>
                         </tr>
                         <tr>
+                            <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
+                            <td><input name="alt_txt" type="text" value="<?php
+                                if ($post_values['alt_txt']){
+                                    echo esc_html( $post_values['alt_txt'] );
+                                }?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
                             <th><label for="product_image">Last opp bilde</label></th>
                             <td>
                                 <input type="file" name="product_image">
@@ -650,23 +657,16 @@ function show_adminpage_forms($categories, $post_values) {
                             if ($post_values['image_url']) {
                                 ?>
                                 <td>
-                                    <p>Eksisterende bilde</p>
+                                    <p>Nåværende bilde</p>
                                     <img src="<?php echo esc_url(plugins_url( $post_values['image_url'], __FILE__ )); ?>"/>
                                 </td>
                                 <?php
                             }
                             ?>
                         </tr>
-                        <tr>
-                            <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
-                            <td><input name="alt_txt" type="text" value="<?php
-                                if ($post_values['alt_txt']){
-                                    echo esc_html( $post_values['alt_txt'] );
-                                }?>" class="regular-text" /></td>
-                        </tr>
                     </tbody>
                 </table>
-                <table class="form-table">
+                <table> <!-- TODO: check if needed for styling:  class="form-table" -->
                     <tbody>
                         <tr>
                             <th><h3>Ingredienser</h3></th>
