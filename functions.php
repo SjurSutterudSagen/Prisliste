@@ -516,9 +516,28 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
                                         ?>
                                     </ul>
                                 </div>
-                            </div>
-                            <div>
-                                <!-- TODO: add the buttons for the delete and edit options to each product -->
+                                <div class="buttons_wrapper">
+                                    <div>
+                                        <form method="POST">
+                                            <input type="hidden" name="edit_product" value="true" />
+                                            <?php wp_nonce_field( 'produktliste_product_edit_update', 'produktliste_product_edit_form' ); ?>
+                                            <p class="submit">
+                                                <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
+                                                <input type="submit" name="edit_product_submit" class="button button-primary" value="Endre">
+                                            </p>
+                                        </form>
+                                    </div>
+                                    <div>
+                                        <form method="POST">
+                                            <input type="hidden" name="delete_product" value="true" />
+                                            <?php wp_nonce_field( 'produktliste_product_delete_update', 'produktliste_product_delete_form' ); ?>
+                                            <p class="submit">
+                                                <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
+                                                <input type="submit" name="delete_product_submit" class="button button-warning" value="Slett">
+                                            </p>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <?php
@@ -555,7 +574,6 @@ function show_adminpage_forms($categories, $preservedValues) {
 
 
 
-        <!-- TODO: Nytt produkt Form -->
         <div class="form_wrapper_product">
             <h2>Legg til nytt produkt</h2>
             <form method="POST" enctype="multipart/form-data">
@@ -565,7 +583,10 @@ function show_adminpage_forms($categories, $preservedValues) {
                     <tbody>
                         <tr>
                             <th><label for="productname">Produktnavn</label></th>
-                            <td><input name="productname" type="text" value="" class="regular-text" /></td>
+                            <td><input name="productname" type="text" value="<?php
+                                if ($preservedValues['productname']){
+                                    echo esc_html( $preservedValues['productname'] );
+                                }?>" class="regular-text" /></td>
                         </tr>
                         <tr>
                             <th><label for="category">Kategori</label></th>
@@ -585,13 +606,18 @@ function show_adminpage_forms($categories, $preservedValues) {
                         </tr>
                         <tr>
                             <th><label for="price">Pris</label></th>
-                            <td><input name="price" type="text" value="" class="regular-text" /></td>
+                            <td>
+                                <input name="price" type="text" value="<?php
+                                if ($preservedValues['price']){
+                                    echo esc_html( $preservedValues['price'] );
+                                }?>" class="regular-text" />
+                            </td>
                             <td>
                                 <select name="price_type" type="text" value="" class="regular-text">
                                     <?php
-                                    if ($preservedValues['category'] === 'kr/kg') {
+                                    if ($preservedValues['price_type'] === 'kr/kg') {
                                         echo "<option value='kr/kg' selected='selected'>kr/kg</option>";
-                                    } elseif ($preservedValues['category'] === 'kr/stk') {
+                                    } elseif ($preservedValues['price_type'] === 'kr/stk') {
                                         echo "<option value='kr/kg'>kr/kg</option>";
                                         echo "<option value='kr/stk' selected='selected'>kr/stk</option>";
                                     } else {
@@ -601,6 +627,16 @@ function show_adminpage_forms($categories, $preservedValues) {
                                     ?>
                                 </select>
                             </td>
+                        </tr>
+                        <tr>
+                            <!-- TODO: ADD INGREDIENTS BASED ON NUMBER NEEDED! -->
+                        </tr>
+                        <tr>
+                            <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
+                            <td><input name="alt_txt" type="text" value="<?php
+                                if ($preservedValues['alt_txt']){
+                                    echo esc_html( $preservedValues['alt_txt'] );
+                                }?>" class="regular-text" /></td>
                         </tr>
                         <tr>
                             <th><label for="product_image">Last opp bilde</label></th>
@@ -613,11 +649,7 @@ function show_adminpage_forms($categories, $preservedValues) {
                             }
                             ?>
                         </tr>
-                        <tr>
-                            <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
-                            <td><input name="alt_txt" type="text" value="" class="regular-text" /></td>
-                        </tr>
-                        <!-- TODO: ADD INGREDIENTS BASED ON NUMBER NEEDED! -->
+
                     </tbody>
                 </table>
                 <p class="submit">
@@ -633,51 +665,133 @@ function show_adminpage_forms($categories, $preservedValues) {
 }
 
 /**********************************************************
- *   Function for building and processing the adminpage   *
+ *   Functions for building and processing the adminpage   *
  *********************************************************/
-function produktliste_setup_menu() {
+//processing POST to the plugin page from the main form
+function produktliste_handle_post_main_form() {
+    if(
+        ! isset( $_POST['produktliste_form'] ) ||
+        ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
+    ){ ?>
+        <div class="error">
+            <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
+        </div> <?php
+        exit;
+    } else {
+        // Handle our form data
 
-    //processing POST to the plugin page
-    function produktliste_handle_post_main_form() {
-        if(
-            ! isset( $_POST['produktliste_form'] ) ||
-            ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
-        ){ ?>
-            <div class="error">
-                <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
-            </div> <?php
-            exit;
-        } else {
-            // Handle our form data
+        //outputting the success message
+        ?>
+        <div class="updated">
+            <p>Main Form Successfully Updated!</p>
+        </div> <?php
 
-            //outputting the success message
-            ?>
-            <div class="updated">
-                <p>Main Form Successfully Updated!</p>
-            </div> <?php
-
-        }
     }
+}
+
+//processing POST to the plugin page from the product edit button
+function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues) {
+    if(
+        ! isset( $_POST['produktliste_product_edit_form'] ) ||
+        ! wp_verify_nonce( $_POST['produktliste_product_edit_form'], 'produktliste_product_edit_update' )
+    ){ ?>
+        <div class="error">
+            <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
+        </div> <?php
+        exit;
+    } else {
+        // Processing the POST
+        //querying db for data on the product
+        $product_id = $_POST['product_id'];
+        $product = $wpdb->get_row( $wpdb->prepare( "
+          SELECT m.id, c.category_name, m.product_name, m.price, m.price_type, m.picture_url, m.picture_alt_tag 
+          FROM {$table_name_main} m, {$table_name_product_category} c 
+          WHERE m.category = c.category_id 
+          AND ID = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
+
+        //querying db for data on the products ingredients
+        $produkt_ingredients = $wpdb->get_results( $wpdb->prepare( "
+          SELECT i.ingredient_name, i.allergen 
+          FROM {$table_name_main} m, {$table_name_product_ingredients} i 
+          WHERE m.id = i.product_id 
+          AND m.id = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
+
+        //updating $preservedValues with correct values
+        $preservedValues['product_id'] = $product['id'];
+        $preservedValues['productname'] = $product['product_name'];
+        $preservedValues['category'] = $product['category_name'];
+        $preservedValues['price'] = $product['price'];
+        $preservedValues['price_type'] = $product['price_type'];
+        $preservedValues['alt_txt'] = $product['picture_alt_tag'];
+        $preservedValues['image_url'] = $product['picture_url'];
+        $preservedValues['number_of_ingredients'] = count($produkt_ingredients);
+
+        return $preservedValues;
+    }
+}
+
+//processing POST to the plugin page from the product delete button
+function produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients) {
+    if(
+        ! isset( $_POST['produktliste_product_delete_form'] ) ||
+        ! wp_verify_nonce( $_POST['produktliste_product_delete_form'], 'produktliste_product_delete_update' )
+    ){ ?>
+        <div class="error">
+            <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
+        </div> <?php
+        exit;
+    } else {
+        // Handle our form data
+
+        //outputting the success message
+        ?>
+        <div class="updated">
+            <p>Delete Button Clicked for Product with ID: <?php echo esc_html( $_POST['product_id'] ); ?>.</p>
+        </div> <?php
+
+    }
+}
+
+function produktliste_setup_menu() {
 
     //the code that creates the admin page of the plugin
     function produktliste_init() {
         $preservedValues;
-        //$preservedValues['image_url'] ='img/eksempel-bilde-1.png';
+
+        //declaring db variables
+        global $wpdb;
+        $table_name_main = $wpdb->prefix . "produktliste_produkter";
+        $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+        $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
+
+//        $preservedValues['image_url'] ='img/eksempel-bilde-1.png';
+//        $preservedValues['productname'] = 'Kjøttpølse';
+//        $preservedValues['category'] = 'Pølser';
+//        $preservedValues['price'] = '198';
+//        $preservedValues['price_type'] = 'kr/stk';
+//
+//        $preservedValues['alt_txt'] = 'Bilde av kjøttpølse.';
 
 
-        //Checking for 'updated' to process the form on POST
+        //Checking for 'main_form_updated' to process the form on POST
         if( $_POST['main_form_updated'] === 'true' ){
             produktliste_handle_post_main_form();
         }
 
-        global $wpdb;
+        //Checking for 'edit_product' to process the form on POST
+        if( $_POST['edit_product'] === 'true' ){
+            $preservedValues = produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues);
+        }
+
+        //Checking for 'delete_product' to process the form on POST
+        if( $_POST['delete_product'] === 'true' ){
+            produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
+        }
+
+        //declaring variables and querying db for needed information
         $categories;
         $produktliste_results;
         $ingredients;
-
-        $table_name_main = $wpdb->prefix . "produktliste_produkter";
-        $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
-        $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
         //query the db for categories
         $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A)
