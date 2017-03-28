@@ -669,6 +669,26 @@ function show_adminpage_forms($categories, $post_values) {
                             <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
                             <td><p>Allergen?</p></td>
                         </tr>
+                        <?php
+                        //loop for ingredients
+                        if ( count($post_values['ingredient']) !== 0) {
+                            for ($i = 0; $i < count($post_values['ingredient']); $i++) {
+                                //the echo is closed in the if statement below
+                                echo "<tr> 
+                                    <th><label for='ingredient[" . ($i + 1) . "]'>Ingrediens " . ($i + 1) . "</label></th>
+                                    <td><input name='ingredient[" . ($i + 1) . "][" . 'ingredient_name' . "]' type='text' value='" . $post_values['ingredient'][$i]['ingredient_name'] . "' class='regular-text' /></td>";
+                                    if ( $post_values['ingredient'][($i + 1)]['allergen'] === '1') {
+                                        echo $post_values['ingredient'][($i + 1)]['allergen'] .' ';
+                                        echo "true<br>";
+                                        echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td></tr>";
+                                    } else {
+                                        echo $post_values['ingredient'][($i + 1)]['ingredient_allergen'] .' ';
+                                        echo "false<br>";
+                                        echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td></tr>";
+                                    }
+                            }
+                        }
+                        ?>
                     </tbody>
                 </table>
                 <p class="submit">
@@ -690,6 +710,7 @@ function show_adminpage_forms($categories, $post_values) {
  *   Functions for building and processing the adminpage   *
  *********************************************************/
 //processing POST to the plugin page from the main form
+//TODO: Add check for what the current user can do!
 function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values) {
     if(
         ! isset( $_POST['produktliste_form'] ) ||
@@ -759,7 +780,11 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         $post_values['price_type'] = $product['price_type'];
         $post_values['alt_txt'] = $product['picture_alt_tag'];
         $post_values['image_url'] = $product['picture_url'];
-        $post_values['number_of_ingredients'] = count($produkt_ingredients);
+
+        for ($i = 0; $i < count($produkt_ingredients); $i++) {
+            $post_values['ingredient'][$i] = $produkt_ingredients[$i];
+        }
+
         $post_values['editing_status'] = TRUE;
 
         return $post_values;

@@ -53,6 +53,7 @@
                 "</tr>"
             );
             console.log('Clicked');
+            //TODO: test prepending to the last child
         });
     });
 })(jQuery);
