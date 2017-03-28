@@ -43,6 +43,9 @@
 
         //ingredients buttons functionality
         var count = 0;
+        if ( $( ".productlist_ingredient" ).length !== 0 ) {
+            count = $( ".productlist_ingredient" ).length;
+        }
         $( '#new_ingredient' ).click(function(){
             count++;
             $( '#ingredients_wrapper' ).append(
