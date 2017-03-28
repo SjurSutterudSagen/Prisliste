@@ -676,14 +676,10 @@ function show_adminpage_forms($categories, $post_values) {
                                 //the echo is closed in the if statement below
                                 echo "<tr> 
                                     <th><label for='ingredient[" . ($i + 1) . "]'>Ingrediens " . ($i + 1) . "</label></th>
-                                    <td><input name='ingredient[" . ($i + 1) . "][" . 'ingredient_name' . "]' type='text' value='" . $post_values['ingredient'][$i]['ingredient_name'] . "' class='regular-text' /></td>";
+                                    <td><input name='ingredient[" . ($i + 1) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_html($post_values['ingredient'][$i]['ingredient_name']) . "' class='regular-text' /></td>";
                                     if ( $post_values['ingredient'][($i + 1)]['allergen'] === '1') {
-                                        echo $post_values['ingredient'][($i + 1)]['allergen'] .' ';
-                                        echo "true<br>";
                                         echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td></tr>";
                                     } else {
-                                        echo $post_values['ingredient'][($i + 1)]['ingredient_allergen'] .' ';
-                                        echo "false<br>";
                                         echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td></tr>";
                                     }
                             }
