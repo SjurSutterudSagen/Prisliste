@@ -592,7 +592,7 @@ function show_adminpage_forms($categories, $post_values) {
                 }
                 ?>
                 <table class="form-table">
-                    <tbody id="ingredients_wrapper">
+                    <tbody>
                         <tr>
                             <th><label for="productname">Produktnavn</label></th>
                             <td><input name="productname" type="text" value="<?php
@@ -664,27 +664,35 @@ function show_adminpage_forms($categories, $post_values) {
                                     echo esc_html( $post_values['alt_txt'] );
                                 }?>" class="regular-text" /></td>
                         </tr>
+                    </tbody>
+                </table>
+                <table class="form-table">
+                    <tbody>
                         <tr>
                             <th><h3>Ingredienser</h3></th>
-                            <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
+                            <td></td>
                             <td><p>Allergen?</p></td>
                         </tr>
                         <?php
                         //loop for ingredients
                         if ( count($post_values['ingredient']) !== 0) {
                             for ($i = 0; $i < count($post_values['ingredient']); $i++) {
-                                //the echo is closed in the if statement below
                                 echo "<tr> 
-                                    <th><label for='ingredient[" . ($i + 1) . "]'>Ingrediens " . ($i + 1) . "</label></th>
-                                    <td><input name='ingredient[" . ($i + 1) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_html($post_values['ingredient'][$i]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
-                                    if ( $post_values['ingredient'][($i + 1)]['allergen'] === '1') {
-                                        echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td></tr>";
-                                    } else {
-                                        echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td></tr>";
-                                    }
+                                        <th><label for='ingredient[" . ($i + 1) . "]'>Ingrediens " . ($i + 1) . "</label></th>
+                                        <td><input name='ingredient[" . ($i + 1) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_html($post_values['ingredient'][$i]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
+                                if ( $post_values['ingredient'][($i + 1)]['allergen'] === '1') {
+                                    echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
+                                } else {
+                                    echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
+                                }
+                                echo "</tr>";
                             }
                         }
                         ?>
+                        <tr id="ingredients_wrapper">
+                            <th></th>
+                            <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
+                        </tr>
                     </tbody>
                 </table>
                 <p class="submit">

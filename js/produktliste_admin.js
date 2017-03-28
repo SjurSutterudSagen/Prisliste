@@ -48,15 +48,14 @@
         }
         $( '#new_ingredient' ).click(function(){
             count++;
-            $( '#ingredients_wrapper' ).append(
+            //inserting the new inputs before the new ingredients button
+            $(
                 "<tr>" +
-                    "<th><label for='ingredient[" + count + "]'>Ingrediens " + count + "</label></th>" +
-                    "<td><input name='ingredient[" + count + "][" + 'ingredient_name' + "]' type='text' value='' class='regular-text' /></td>" +
-                    "<td><input name='ingredient[" + count + "][" + 'ingredient_allergen' + "]' type='checkbox' value='true' class='regular-text' /></td>" +
+                "<th><label for='ingredient[" + count + "]'>Ingrediens " + count + "</label></th>" +
+                "<td><input name='ingredient[" + count + "][" + 'ingredient_name' + "]' type='text' value='' class='regular-text' /></td>" +
+                "<td><input name='ingredient[" + count + "][" + 'ingredient_allergen' + "]' type='checkbox' value='true' class='regular-text' /></td>" +
                 "</tr>"
-            );
-            console.log('Clicked');
-            //TODO: test prepending to the last child
+            ).insertBefore( '#ingredients_wrapper' );
         });
     });
 })(jQuery);
