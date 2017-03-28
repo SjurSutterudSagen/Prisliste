@@ -575,10 +575,22 @@ function show_adminpage_forms($categories, $preservedValues) {
 
 
         <div class="form_wrapper_product">
-            <h2>Legg til nytt produkt</h2>
+            <?php
+            if ($preservedValues['editing_status']) {
+                echo '<h2>Endre produkt</h2>';
+            } else {
+                echo '<h2>Legg til nytt produkt</h2>';
+            }
+            ?>
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="main_form_updated" value="true" />
-                <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' ); ?>
+                <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
+                if ($preservedValues['editing_status']) {
+                    echo '<input type="hidden" name="editing_status" value="true" />';
+                } else {
+                    echo '<input type="hidden" name="editing_status" value="false" />';
+                }
+                ?>
                 <table class="form-table">
                     <tbody>
                         <tr>
@@ -668,7 +680,7 @@ function show_adminpage_forms($categories, $preservedValues) {
  *   Functions for building and processing the adminpage   *
  *********************************************************/
 //processing POST to the plugin page from the main form
-function produktliste_handle_post_main_form() {
+function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues) {
     if(
         ! isset( $_POST['produktliste_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
@@ -679,11 +691,16 @@ function produktliste_handle_post_main_form() {
         exit;
     } else {
         // Handle our form data
+        //updating editing status for displaying correct text
+        $editing_status = sanitize_text_field($_POST['editing_status']);
+        if ($editing_status) {
+            $preservedValues['editing_status'] = TRUE;
+        }
 
         //outputting the success message
         ?>
         <div class="updated">
-            <p>Main Form Successfully Updated!</p>
+            <p>Produkt lagret!</p>
         </div> <?php
 
     }
@@ -725,6 +742,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         $preservedValues['alt_txt'] = $product['picture_alt_tag'];
         $preservedValues['image_url'] = $product['picture_url'];
         $preservedValues['number_of_ingredients'] = count($produkt_ingredients);
+        $preservedValues['editing_status'] = TRUE;
 
         return $preservedValues;
     }
@@ -766,7 +784,7 @@ function produktliste_setup_menu() {
 
         //Checking for 'main_form_updated' to process the form on POST
         if( $_POST['main_form_updated'] === 'true' ){
-            produktliste_handle_post_main_form();
+            produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues);
         }
 
         //Checking for 'edit_product' to process the form on POST
