@@ -552,7 +552,7 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
     <?php
 }
 
-function show_adminpage_forms($categories, $preservedValues) {
+function show_adminpage_forms($categories, $post_values) {
     ?>
     <div class="wrap">
         <div>
@@ -576,7 +576,7 @@ function show_adminpage_forms($categories, $preservedValues) {
 
         <div class="form_wrapper_product">
             <?php
-            if ($preservedValues['editing_status']) {
+            if ($post_values['editing_status']) {
                 echo '<h2>Endre produkt</h2>';
             } else {
                 echo '<h2>Legg til nytt produkt</h2>';
@@ -585,7 +585,7 @@ function show_adminpage_forms($categories, $preservedValues) {
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="main_form_updated" value="true" />
                 <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
-                if ($preservedValues['editing_status']) {
+                if ($post_values['editing_status']) {
                     echo '<input type="hidden" name="editing_status" value="true" />';
                 } else {
                     echo '<input type="hidden" name="editing_status" value="false" />';
@@ -596,8 +596,8 @@ function show_adminpage_forms($categories, $preservedValues) {
                         <tr>
                             <th><label for="productname">Produktnavn</label></th>
                             <td><input name="productname" type="text" value="<?php
-                                if ($preservedValues['productname']){
-                                    echo esc_html( $preservedValues['productname'] );
+                                if ($post_values['productname']){
+                                    echo esc_html( $post_values['productname'] );
                                 }?>" class="regular-text" /></td>
                         </tr>
                         <tr>
@@ -606,7 +606,7 @@ function show_adminpage_forms($categories, $preservedValues) {
                                 <select name="category" type="text" value="" class="regular-text">
                                     <?php
                                     foreach ($categories as $category) {
-                                        if ($preservedValues['category'] === $category['category_name']) {
+                                        if ($post_values['category'] === $category['category_name']) {
                                             echo "<option value='" . esc_html( $category['category_name'] ) . "' selected='selected'>" . esc_html( $category['category_name'] ) . "</option>";
                                         } else {
                                             echo "<option value='" . esc_html( $category['category_name'] ) . "'>" . esc_html( $category['category_name'] ) . "</option>";
@@ -620,16 +620,17 @@ function show_adminpage_forms($categories, $preservedValues) {
                             <th><label for="price">Pris</label></th>
                             <td>
                                 <input name="price" type="text" value="<?php
-                                if ($preservedValues['price']){
-                                    echo esc_html( $preservedValues['price'] );
+                                if ($post_values['price']){
+                                    echo esc_html( $post_values['price'] );
                                 }?>" class="regular-text" />
                             </td>
                             <td>
                                 <select name="price_type" type="text" value="" class="regular-text">
                                     <?php
-                                    if ($preservedValues['price_type'] === 'kr/kg') {
+                                    if ($post_values['price_type'] === '0') {
                                         echo "<option value='kr/kg' selected='selected'>kr/kg</option>";
-                                    } elseif ($preservedValues['price_type'] === 'kr/stk') {
+                                        echo "<option value='kr/stk'>kr/stk</option>";
+                                    } elseif ($post_values['price_type'] === '1') {
                                         echo "<option value='kr/kg'>kr/kg</option>";
                                         echo "<option value='kr/stk' selected='selected'>kr/stk</option>";
                                     } else {
@@ -646,17 +647,17 @@ function show_adminpage_forms($categories, $preservedValues) {
                         <tr>
                             <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
                             <td><input name="alt_txt" type="text" value="<?php
-                                if ($preservedValues['alt_txt']){
-                                    echo esc_html( $preservedValues['alt_txt'] );
+                                if ($post_values['alt_txt']){
+                                    echo esc_html( $post_values['alt_txt'] );
                                 }?>" class="regular-text" /></td>
                         </tr>
                         <tr>
                             <th><label for="product_image">Last opp bilde</label></th>
-                            <td><input type="file" name="product_image" id="product_image_upload"></td>
+                            <td><input type="file" name="product_image"></td>
                             <?php
-                            if ($preservedValues['image_url']) {
+                            if ($post_values['image_url']) {
                                 ?>
-                                <td><img src="<?php echo esc_url(plugins_url( $preservedValues['image_url'], __FILE__ )); ?>"/></td>
+                                <td><img src="<?php echo esc_url(plugins_url( $post_values['image_url'], __FILE__ )); ?>"/></td>
                                 <?php
                             }
                             ?>
@@ -665,10 +666,13 @@ function show_adminpage_forms($categories, $preservedValues) {
                     </tbody>
                 </table>
                 <p class="submit">
-                    <input type="submit" name="submit" id="submit" class="button button-primary" value="Lagre Produkt">
+                    <input type="submit" name="submit" class="button button-primary" value="Lagre Produkt">
                 </p>
             </form>
-
+            <form method="POST">
+                <p class="submit">
+                    <input type="submit" name="reset" class="button" value="Reset siden">
+                </p>
             </form>
         </div>
     </div>
@@ -680,7 +684,7 @@ function show_adminpage_forms($categories, $preservedValues) {
  *   Functions for building and processing the adminpage   *
  *********************************************************/
 //processing POST to the plugin page from the main form
-function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues) {
+function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values) {
     if(
         ! isset( $_POST['produktliste_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
@@ -694,8 +698,15 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         //updating editing status for displaying correct text
         $editing_status = sanitize_text_field($_POST['editing_status']);
         if ($editing_status) {
-            $preservedValues['editing_status'] = TRUE;
+            $post_values['editing_status'] = TRUE;
         }
+
+        //validating the data
+        //TODO: Add validation of data before storing with error messages
+        //TODO: Confirm editing status is working with faulty inputs
+
+        //storing the data
+        //TODO: Add storing logic for both products and ingredients
 
         //outputting the success message
         ?>
@@ -707,7 +718,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 }
 
 //processing POST to the plugin page from the product edit button
-function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues) {
+function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values) {
     if(
         ! isset( $_POST['produktliste_product_edit_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_product_edit_form'], 'produktliste_product_edit_update' )
@@ -733,18 +744,18 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
           WHERE m.id = i.product_id 
           AND m.id = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
 
-        //updating $preservedValues with correct values
-        $preservedValues['product_id'] = $product['id'];
-        $preservedValues['productname'] = $product['product_name'];
-        $preservedValues['category'] = $product['category_name'];
-        $preservedValues['price'] = $product['price'];
-        $preservedValues['price_type'] = $product['price_type'];
-        $preservedValues['alt_txt'] = $product['picture_alt_tag'];
-        $preservedValues['image_url'] = $product['picture_url'];
-        $preservedValues['number_of_ingredients'] = count($produkt_ingredients);
-        $preservedValues['editing_status'] = TRUE;
+        //updating $post_values with correct values
+        $post_values['product_id'] = $product['id'];
+        $post_values['productname'] = $product['product_name'];
+        $post_values['category'] = $product['category_name'];
+        $post_values['price'] = $product['price'];
+        $post_values['price_type'] = $product['price_type'];
+        $post_values['alt_txt'] = $product['picture_alt_tag'];
+        $post_values['image_url'] = $product['picture_url'];
+        $post_values['number_of_ingredients'] = count($produkt_ingredients);
+        $post_values['editing_status'] = TRUE;
 
-        return $preservedValues;
+        return $post_values;
     }
 }
 
@@ -774,7 +785,7 @@ function produktliste_setup_menu() {
 
     //the code that creates the admin page of the plugin
     function produktliste_init() {
-        $preservedValues;
+        $post_values;
 
         //declaring db variables
         global $wpdb;
@@ -784,12 +795,12 @@ function produktliste_setup_menu() {
 
         //Checking for 'main_form_updated' to process the form on POST
         if( $_POST['main_form_updated'] === 'true' ){
-            produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues);
+            produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values);
         }
 
         //Checking for 'edit_product' to process the form on POST
         if( $_POST['edit_product'] === 'true' ){
-            $preservedValues = produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $preservedValues);
+            $post_values = produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values);
         }
 
         //Checking for 'delete_product' to process the form on POST
@@ -818,7 +829,7 @@ function produktliste_setup_menu() {
             FROM    {$table_name_product_ingredients}
         ", ARRAY_A)or die ( $wpdb->last_error );
 
-        show_adminpage_forms($categories, $preservedValues);
+        show_adminpage_forms($categories, $post_values);
         show_produktliste_admin($categories, $produktliste_results, $ingredients);
     }
 
