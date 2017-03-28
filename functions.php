@@ -346,7 +346,7 @@ function load_produktliste_js_admin($hook){
         return;
     }
 
-    wp_register_script( 'produktliste_script', plugins_url( '/js/produktliste.js', __FILE__ ), array( 'jquery' ) );
+    wp_register_script( 'produktliste_script', plugins_url( '/js/produktliste_admin.js', __FILE__ ), array( 'jquery' ) );
     wp_enqueue_script('produktliste_script');
 }
 
@@ -592,7 +592,7 @@ function show_adminpage_forms($categories, $post_values) {
                 }
                 ?>
                 <table class="form-table">
-                    <tbody>
+                    <tbody id="ingredients_wrapper">
                         <tr>
                             <th><label for="productname">Produktnavn</label></th>
                             <td><input name="productname" type="text" value="<?php
@@ -642,7 +642,20 @@ function show_adminpage_forms($categories, $post_values) {
                             </td>
                         </tr>
                         <tr>
-                            <!-- TODO: ADD INGREDIENTS BASED ON NUMBER NEEDED! -->
+                            <th><label for="product_image">Last opp bilde</label></th>
+                            <td>
+                                <input type="file" name="product_image">
+                            </td>
+                            <?php
+                            if ($post_values['image_url']) {
+                                ?>
+                                <td>
+                                    <p>Eksisterende bilde</p>
+                                    <img src="<?php echo esc_url(plugins_url( $post_values['image_url'], __FILE__ )); ?>"/>
+                                </td>
+                                <?php
+                            }
+                            ?>
                         </tr>
                         <tr>
                             <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
@@ -652,17 +665,10 @@ function show_adminpage_forms($categories, $post_values) {
                                 }?>" class="regular-text" /></td>
                         </tr>
                         <tr>
-                            <th><label for="product_image">Last opp bilde</label></th>
-                            <td><input type="file" name="product_image"></td>
-                            <?php
-                            if ($post_values['image_url']) {
-                                ?>
-                                <td><img src="<?php echo esc_url(plugins_url( $post_values['image_url'], __FILE__ )); ?>"/></td>
-                                <?php
-                            }
-                            ?>
+                            <th><h3>Ingredienser</h3></th>
+                            <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
+                            <td><p>Allergen?</p></td>
                         </tr>
-
                     </tbody>
                 </table>
                 <p class="submit">
@@ -700,10 +706,11 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         if ($editing_status) {
             $post_values['editing_status'] = TRUE;
         }
+        //TODO: Confirm editing status is working with faulty inputs
 
         //validating the data
         //TODO: Add validation of data before storing with error messages
-        //TODO: Confirm editing status is working with faulty inputs
+
 
         //storing the data
         //TODO: Add storing logic for both products and ingredients
