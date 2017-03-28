@@ -764,15 +764,6 @@ function produktliste_setup_menu() {
         $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
         $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
-//        $preservedValues['image_url'] ='img/eksempel-bilde-1.png';
-//        $preservedValues['productname'] = 'Kjøttpølse';
-//        $preservedValues['category'] = 'Pølser';
-//        $preservedValues['price'] = '198';
-//        $preservedValues['price_type'] = 'kr/stk';
-//
-//        $preservedValues['alt_txt'] = 'Bilde av kjøttpølse.';
-
-
         //Checking for 'main_form_updated' to process the form on POST
         if( $_POST['main_form_updated'] === 'true' ){
             produktliste_handle_post_main_form();
@@ -799,29 +790,18 @@ function produktliste_setup_menu() {
 
         //query the db for all products
         $produktliste_results =  $wpdb->get_results("
-        SELECT id, category, product_name, price, price_type, picture_url, picture_alt_tag
-        FROM    {$table_name_main}
-    ", ARRAY_A)or die ( $wpdb->last_error );
+            SELECT id, category, product_name, price, price_type, picture_url, picture_alt_tag
+            FROM    {$table_name_main}
+        ", ARRAY_A)or die ( $wpdb->last_error );
 
         //query db for data on ingredients and allergens
         $ingredients = $wpdb->get_results("
-        SELECT product_id, ingredient_name, allergen
-        FROM    {$table_name_product_ingredients}
-    ", ARRAY_A)or die ( $wpdb->last_error );
+            SELECT product_id, ingredient_name, allergen
+            FROM    {$table_name_product_ingredients}
+        ", ARRAY_A)or die ( $wpdb->last_error );
 
         show_adminpage_forms($categories, $preservedValues);
         show_produktliste_admin($categories, $produktliste_results, $ingredients);
-
-//        global $wpdb;//grabbing the wp database prefix in this install
-//        echo $wpdb->prefix . 'produktliste<br>';
-//        echo $wpdb->prefix . 'produktliste_kategorier<br>';
-//        echo $wpdb->prefix . 'produktliste_produkt_ingredienser<br>';
-//        echo $wpdb->get_charset_collate() . '<br>';
-//        echo '<img src="' . plugins_url( 'img/eksempel-bilde-1.png', __FILE__ ) . '" > ';
-//        echo '<br>';
-        //https://www.smashingmagazine.com/2016/04/three-approaches-to-adding-configurable-fields-to-your-plugin/
-
-
     }
 
     add_menu_page(
