@@ -730,7 +730,7 @@ function show_adminpage_forms($categories, $post_values) {
                             <td><p>Allergen?</p></td>
                         </tr>
                         <?php
-                        //hvis ingen ingredienser ble lagt til ved lagrings POST
+                        //if no ingredients were added for a new product
                         if ($post_values['validation_errors']['ingredients_number']) {
                             ?>
                             <tr>
