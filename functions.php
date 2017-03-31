@@ -732,16 +732,16 @@ function show_adminpage_forms($categories, $post_values) {
                         if ( count($post_values['ingredient']) !== 0) {
                             for ($i = 0; $i < count($post_values['ingredient']); $i++) {
                                 echo "<tr> 
-                                        <th><label for='ingredient[" . ($i + 1) . "]'>Ingrediens " . ($i + 1) . "</label></th>
-                                        <td><input name='ingredient[" . ($i + 1) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][$i]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
-                                if ( $post_values['ingredient'][($i + 1)]['allergen'] === '1') {
-                                    echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
+                                        <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
+                                        <td><input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
+                                if ( $post_values['ingredient'][($i)]['allergen'] === 1) {
+                                    echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
                                 } else {
-                                    echo "<td><input name='ingredient[" . ($i + 1) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
+                                    echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
                                 }
-                                if ($post_values['validation_errors']['ingredient'][$count]) {
+                                if ( $post_values['validation_errors']['ingredient'][($i)] ) {
                                     echo '<td><p>';
-                                    echo $post_values['validation_errors']['ingredient'][$count];
+                                    echo $post_values['validation_errors']['ingredient'][($i)];
                                     echo '</p></td>';
                                 }
                                 echo "</tr>";
@@ -810,7 +810,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         }
 
         //declaring the error message variables
-        $post_values['validation_errors']['product_name'] = 'test';
+        $post_values['validation_errors']['product_name'];
         $post_values['validation_errors']['category'];
         $post_values['validation_errors']['price'];
         $post_values['validation_errors']['price_type'];
@@ -821,15 +821,16 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         if ($_POST['ingredient']) {
             $count = 0;
             foreach ($_POST['ingredient'] as $ingredient) {
-                $count++;
                 $post_values['ingredient'][$count]['ingredient_name'] = sanitize_text_field($ingredient['ingredient_name']);
                 if ($ingredient['allergen']) {
                     $post_values['ingredient'][$count]['allergen'] = abs($ingredient['allergen']);
+                } else {
+                    $post_values['ingredient'][$count]['allergen'] = 0;
                 }
-                $post_values['validation_errors']['ingredient'][$count] = 'test';
+                $post_values['validation_errors']['ingredient'][$count];
+                $count++;
             }
         }
-
 
         //validating the inputs
 
@@ -909,7 +910,8 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         $post_values['image_url'] = $product['picture_url'];
 
         for ($i = 0; $i < count($produkt_ingredients); $i++) {
-            $post_values['ingredient'][$i] = $produkt_ingredients[$i];
+            $post_values['ingredient'][$i]['ingredient_name'] = $produkt_ingredients[$i]['ingredient_name'];
+            $post_values['ingredient'][$i]['allergen'] = absint($produkt_ingredients[$i]['allergen']);
         }
 
         $post_values['editing_status'] = TRUE;
