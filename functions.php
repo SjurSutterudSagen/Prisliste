@@ -553,6 +553,8 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
 }
 
 function show_adminpage_forms($categories, $post_values) {
+    echo '<pre>';
+    var_dump($post_values)
     ?>
     <div>
         <div>
@@ -728,6 +730,16 @@ function show_adminpage_forms($categories, $post_values) {
                             <td><p>Allergen?</p></td>
                         </tr>
                         <?php
+                        //hvis ingen ingredienser ble lagt til ved lagrings POST
+                        if ($post_values['validation_errors']['ingredients_number']) {
+                            ?>
+                            <tr>
+                                <th></th>
+                                <td><?php echo $post_values['validation_errors']['ingredients_number'];?></td>
+                            </tr>
+
+                            <?php
+                        }
                         //loop for ingredients
                         if ( count($post_values['ingredient']) !== 0) {
                             for ($i = 0; $i < count($post_values['ingredient']); $i++) {
@@ -809,13 +821,25 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
             $post_values['ingredient'][$i] = $produkt_ingredients[$i];
         }
 
-        //declaring the error message variables
-        $post_values['validation_errors']['product_name'];
-        $post_values['validation_errors']['category'];
-        $post_values['validation_errors']['price'];
-        $post_values['validation_errors']['price_type'];
-        $post_values['validation_errors']['alt_txt'];
-        $post_values['validation_errors']['product_image'];
+        //validating the inputs as they are declared
+        if (validate_product_name($post_values['productname']) !== NULL) {
+            $post_values['validation_errors']['product_name'] = validate_product_name($post_values);
+        }
+        if (validate_category($post_values['category']) !== NULL) {
+            $post_values['validation_errors']['category'] = validate_category($post_values['category']);
+        }
+        if (validate_price($post_values['price']) !== NULL) {
+            $post_values['validation_errors']['price'] = validate_price($post_values['price']);
+        }
+        if (validate_price_type($post_values['price_type']) !== NULL) {
+            $post_values['validation_errors']['price_type'] = validate_price_type($post_values['price_type']);
+        }
+        if (validate_image_alt_txt($post_values['alt_txt']) !== NULL) {
+            $post_values['validation_errors']['alt_txt'] = validate_image_alt_txt($post_values['alt_txt']);
+        }
+        if (validate_image($post_values['image_url']) !== NULL) {
+            $post_values['validation_errors']['product_image'] = validate_image($post_values['image_url']);
+        }
 
         //loop for sanitizing ingredients array and declaring ingredients validation errors variables
         if ($_POST['ingredient']) {
@@ -823,16 +847,21 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
             foreach ($_POST['ingredient'] as $ingredient) {
                 $post_values['ingredient'][$count]['ingredient_name'] = sanitize_text_field($ingredient['ingredient_name']);
                 if ($ingredient['allergen']) {
-                    $post_values['ingredient'][$count]['allergen'] = abs($ingredient['allergen']);
+                    $post_values['ingredient'][$count]['allergen'] = 1;
                 } else {
                     $post_values['ingredient'][$count]['allergen'] = 0;
                 }
-                $post_values['validation_errors']['ingredient'][$count];
+                //only validating ingredient name since allergen is a boolean
+                if (validate_ingredient($post_values['ingredient'][$count]['ingredient_name']) !== NULL) {
+                    $post_values['validation_errors']['ingredient'][$count]['ingredient_name'] = validate_ingredient($post_values['ingredient'][$count]['ingredient_name']);
+                }
                 $count++;
             }
+        } else {
+            $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
         }
 
-        //validating the inputs
+
 
 
         //need if for checking if new image
@@ -844,10 +873,6 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 
         //storing the data
         //TODO: Add storing logic for both products and ingredients
-
-        //tmp check for errors
-//        echo '<br><p>VALIDATION ERROR COUNT</p><br>';
-//        echo count($post_values['validation_errors']);
 
         if ( count($post_values['validation_errors']) !== 0){
             //if there are errors
@@ -862,7 +887,9 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
             return $post_values;
 
         } else {
-            //there are no errors so outputting the success message
+            //there are no errors: storing to db and outputting the success message
+
+
             ?>
             <div class="updated">
                 <p>Produkt lagret!</p>
@@ -1007,13 +1034,14 @@ function produktliste_setup_menu() {
 /******************************************
  *   Functions for validating the inputs  *
  *****************************************/
-function validate_product_name($prod_name) {
-    if ( $prod_name === "") {
+function validate_product_name($productname) {
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\% ]/";
+    if ( $productname === "") {
         return '<p>Mangler produktnavn.</p>';
-    } elseif ( (strlen($prod_name) < 3) || (strlen($prod_name) > 200) ) {
+    } elseif ( (strlen($productname) < 3) || (strlen($productname) > 200) ) {
         return '<p>Produktnavn må være mellom 3 og 200 bokstaver.</p>';
-    } else {
-        return "";
+    }elseif ( preg_match($preg_pattern, $post_values['product_name']) ) {
+        return '<p>Bare store og små bokstaver, tall, parenteser, & og % er tillatt.</p>';
     }
 }
 
@@ -1038,7 +1066,11 @@ function validate_image($img) {
 
 }
 
-function validate_ingredients($ingredients_Arr) {
+function validate_ingredient_number($ingredient_name) {
+
+}
+
+function validate_ingredient($ingredient_name) {
 
 }
 ?>
