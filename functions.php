@@ -744,7 +744,7 @@ function show_adminpage_forms($categories, $post_values) {
                                 echo "<tr> 
                                         <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
                                         <td><input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
-                                if ( $post_values['ingredient'][($i)]['allergen'] === 1) {
+                                if ( $post_values['ingredient'][$i]['allergen'] === 1) {
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
                                 } else {
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
@@ -799,9 +799,10 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         // Handle our form data
         //updating editing status for displaying correct text
         $editing_status = sanitize_text_field($_POST['editing_status']);
-        if ($editing_status === TRUE) {
+        if (strtolower($editing_status) === 'true') {
             $post_values['editing_status'] = TRUE;
         }
+
         //sanetizing and storing the $_POST values
         $post_values['product_id'] = absint($_POST['prod_id']);
         $post_values['productname'] = sanitize_text_field($_POST['productname']);
@@ -813,21 +814,6 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         for ($i = 0; $i < count($produkt_ingredients); $i++) {
             $post_values['ingredient'][$i] = $produkt_ingredients[$i];
         }
-        //if the user is editing an existing product OR creating a new product, add the image to post_values variabe and validate it
-        if ( ($post_values['editing_status'] && ($_FILES['product_image']['error'] === 0))/* || (!$post_values['editing_status']) */) {
-            echo '<pre>editing status is: <br>';
-            var_dump($post_values['editing_status']);
-            echo '<br>image status is: <br>';
-            var_dump($_FILES['product_image']);
-            echo '</pre>';
-
-            $post_values['image'] = $_FILES['product_image'];
-
-            if (validate_image($post_values['image']) !== NULL) {
-                $post_values['validation_errors']['product_image'] = validate_image($post_values['image']);
-            }
-        }
-
 
         //validating the inputs as they are declared
         if (validate_product_name($post_values['productname']) !== NULL) {
@@ -859,6 +845,105 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         } else {
             $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
         }
+
+        //if the user is editing an existing product and adds a new image OR creating a new product, add the image to post_values variable and validate it
+        if ( ( ($post_values['editing_status'] === TRUE) && ($_FILES['product_image']['error'] === 0) ) || (!$post_values['editing_status'] === TRUE) ) {
+            $post_values['image'] = $_FILES['product_image'];
+
+            if (validate_image($post_values['image']) !== NULL) {
+                $post_values['validation_errors']['product_image'] = validate_image($post_values['image']);
+            }
+
+            //output message depending on validation errors or not
+            if ( count($post_values['validation_errors']) !== 0) {
+                //if there are errors
+                ?>
+                <div class="error">
+                    <p>Vennligst fiks feilene!</p>
+                </div>
+                <?php
+                return $post_values;
+
+            } else {
+                //there are no errors: storing to db and outputting the success message
+                //new product
+                if (!$post_values['editing_status'] === TRUE) {
+                    //store image
+                    $image_id = media_handle_upload('product_image', 0);
+                    //checking for error uploading the file
+                    if ( is_wp_error($image_id) ) {
+                        ?>
+                        <div class="error">
+                            <p>Opplasting av bildet feilet. Vennligst prøv igjen.!</p>
+                        </div>
+                        <?php
+                        return $post_values;
+                    }
+
+                    //store new product with reference to image
+                    //$wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients,
+                    $wpdb->insert( $table_name_main, array(
+                            'product_name' => $post_values['productname'],
+                            'category' => $post_values['category'],
+                            'price' => $post_values['price'],
+                            'price_type' => $post_values['price_type'],
+                            'picture_url' => $image_id,
+                            'picture_alt_tag' => $post_values['alt_txt']
+                        ), array( '%s', '%d', '%d', '%d', '%d', '%s' )
+                    );
+                    $id_of_new_product = $wpdb->insert_id;
+
+                    //TODO: how to change filename?
+                    foreach ($post_values['ingredient'] as $ingredient) {
+                        $wpdb->insert( $table_name_product_ingredients, array(
+                                'product_id' => $id_of_new_product,
+                                'ingredient_name' => $ingredient['ingredient_name'],
+                                'allergen' => $ingredient['allergen']
+                            ), array( '%d', '%s', '%d' )
+                        );
+                    }
+                } else {
+                    //existing product with a new image
+                    //store image
+
+                    //store new product with reference to image
+                }
+
+                ?>
+                <div class="updated">
+                    <p>Produkt lagret(nytt prod el eksisterende prod med nytt bildet)!</p>
+                </div>
+                <?php
+
+            }
+        } else {
+            //output message depending on validation errors or not
+            if ( count($post_values['validation_errors']) !== 0){
+                //if there are errors
+                ?>
+                <div class="error">
+                    <p>Vennligst fiks feilene!</p>
+                </div>
+                <?php
+
+
+                return $post_values;
+
+            } else {
+                //there are no errors: storing to db and outputting the success message
+
+
+                ?>
+                <div class="updated">
+                    <p>Produkt lagret eksisterende prod uten bilde!</p>
+                </div>
+                <?php
+
+            }
+        }
+
+
+
         //need if for checking if new image
 
         //how to delete image
@@ -874,31 +959,6 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 //        } elseif (editing_status)
 
 
-
-
-        if ( count($post_values['validation_errors']) !== 0){
-            //if there are errors
-
-            ?>
-            <div class="error">
-                <p>Vennligst fiks feilene!</p>
-            </div>
-            <?php
-
-
-            return $post_values;
-
-        } else {
-            //there are no errors: storing to db and outputting the success message
-
-
-            ?>
-            <div class="updated">
-                <p>Produkt lagret!</p>
-            </div>
-            <?php
-
-        }
     }
 }
 
@@ -944,7 +1004,6 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         }
 
         $post_values['editing_status'] = TRUE;
-
         return $post_values;
     }
 }
