@@ -574,7 +574,7 @@ function show_adminpage_forms($categories, $post_values) {
 
         <div class="form_wrapper_product">
             <?php
-            if ($post_values['editing_status']) {
+            if ($post_values['editing_status'] === TRUE) {
                 echo '<h2>Endre produkt</h2>';
             } else {
                 echo '<h2>Legg til nytt produkt</h2>';
@@ -583,7 +583,7 @@ function show_adminpage_forms($categories, $post_values) {
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="main_form_updated" value="true" />
                 <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
-                if ($post_values['editing_status']) {
+                if ($post_values['editing_status'] === TRUE) {
                     echo '<input type="hidden" name="editing_status" value="true" />';
                 } else {
                     echo '<input type="hidden" name="editing_status" value="false" />';
@@ -708,11 +708,11 @@ function show_adminpage_forms($categories, $post_values) {
                                 echo $post_values['validation_errors']['product_image'];
                                 echo '</p></td>';
                             }
-                            if ( ($post_values['image_url']) && ( !is_array($post_values['image_url']) ) ) {
+                            if ( ($post_values['image']) && ( !is_array($post_values['image']) ) ) {
                                 ?>
                                 <td>
                                     <p>Nåværende bilde</p>
-                                    <img src="<?php echo esc_url(plugins_url( $post_values['image_url'], __FILE__ )); ?>"/>
+                                    <img src="<?php echo esc_url(plugins_url( $post_values['image'], __FILE__ )); ?>"/>
                                 </td>
                                 <?php
                             }
@@ -799,13 +799,9 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         // Handle our form data
         //updating editing status for displaying correct text
         $editing_status = sanitize_text_field($_POST['editing_status']);
-        if ($editing_status) {
+        if ($editing_status === TRUE) {
             $post_values['editing_status'] = TRUE;
         }
-        //TODO: Confirm editing status is working with faulty inputs
-
-        //sanitizing the data
-        //TODO: Add validation of data before storing with error messages
         //sanetizing and storing the $_POST values
         $post_values['product_id'] = absint($_POST['prod_id']);
         $post_values['productname'] = sanitize_text_field($_POST['productname']);
@@ -813,11 +809,25 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         $post_values['price'] = sanitize_text_field($_POST['price']); //using sanitize_text_field and not absint because absint changes a string of only characters to 0.
         $post_values['price_type'] = absint($_POST['price_type']);
         $post_values['alt_txt'] = sanitize_text_field($_POST['alt_txt']);
-        $post_values['image_url'] = $_FILES['product_image'];
 
         for ($i = 0; $i < count($produkt_ingredients); $i++) {
             $post_values['ingredient'][$i] = $produkt_ingredients[$i];
         }
+        //if the user is editing an existing product OR creating a new product, add the image to post_values variabe and validate it
+        if ( ($post_values['editing_status'] && ($_FILES['product_image']['error'] === 0))/* || (!$post_values['editing_status']) */) {
+            echo '<pre>editing status is: <br>';
+            var_dump($post_values['editing_status']);
+            echo '<br>image status is: <br>';
+            var_dump($_FILES['product_image']);
+            echo '</pre>';
+
+            $post_values['image'] = $_FILES['product_image'];
+
+            if (validate_image($post_values['image']) !== NULL) {
+                $post_values['validation_errors']['product_image'] = validate_image($post_values['image']);
+            }
+        }
+
 
         //validating the inputs as they are declared
         if (validate_product_name($post_values['productname']) !== NULL) {
@@ -828,9 +838,6 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         }
         if (validate_image_alt_txt($post_values['alt_txt']) !== NULL) {
             $post_values['validation_errors']['alt_txt'] = validate_image_alt_txt($post_values['alt_txt']);
-        }
-        if (validate_image($post_values['image_url']) !== NULL) {
-            $post_values['validation_errors']['product_image'] = validate_image($post_values['image_url']);
         }
 
         //loop for sanitizing ingredients array and declaring ingredients validation errors variables
@@ -850,10 +857,8 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 $count++;
             }
         } else {
-            //TODO: uncomment this $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
+            $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
         }
-        echo '<pre>';
-        var_dump($post_values['validation_errors']['ingredient']);
         //need if for checking if new image
 
         //how to delete image
@@ -863,6 +868,13 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 
         //storing the data
         //TODO: Add storing logic for both products and ingredients
+
+//        if editing_status and new image () {
+//
+//        } elseif (editing_status)
+
+
+
 
         if ( count($post_values['validation_errors']) !== 0){
             //if there are errors
@@ -924,7 +936,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         $post_values['price'] = $product['price'];
         $post_values['price_type'] = $product['price_type'];
         $post_values['alt_txt'] = $product['picture_alt_tag'];
-        $post_values['image_url'] = $product['picture_url'];
+        $post_values['image'] = $product['picture_url'];
 
         for ($i = 0; $i < count($produkt_ingredients); $i++) {
             $post_values['ingredient'][$i]['ingredient_name'] = $produkt_ingredients[$i]['ingredient_name'];
@@ -1058,13 +1070,38 @@ function validate_image_alt_txt($img_alt_txt) {
 }
 
 function validate_image($img) {
-    $image_type_info =  wp_check_filetype_and_ext($file, $img['name']);
-    var_dump($image_type_info);
+    $image_type_info = wp_check_filetype_and_ext($img['name'], $img['name']);
+
+    $allowed_size = 5000000;
+
+    $ext = '';
+    switch ($image_type_info['type']) {
+        case 'image/jpeg':
+            $ext = 'jpeg';
+            break;
+        case 'image/jpg':
+            $ext = 'jpg';
+            break;
+        case 'image/png';
+            $ext = 'png';
+            break;
+        default:
+            $ext = '';
+            break;
+    }
+
+    if ($img['error'] !== 0) {
+        return '<p>Dette er ikke et gyldig bildet.</p>';
+    } elseif (!$ext) {
+        return '<p>Bildet har ikke en gyldig filtype. Gyldige filetyper er: .jpeg .jpg .png.</p>';
+    } elseif ($img['size'] > $allowed_size) {
+        return '<p>Bildet er for stort. Maks tillatt størrelse er 5MB.</p>';
+    }
 
 }
 
 function validate_ingredient($ingredient_name) {
-    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\% ]/";
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9(),\&\% ]/";
     if ( $ingredient_name === "") {
         return '<p>Ingrediensnavnet mangler.</p>';
     } elseif ( preg_match($preg_pattern, $ingredient_name) ) {
