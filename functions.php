@@ -553,8 +553,6 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
 }
 
 function show_adminpage_forms($categories, $post_values) {
-    echo '<pre>';
-    var_dump($post_values)
     ?>
     <div>
         <div>
@@ -639,7 +637,7 @@ function show_adminpage_forms($categories, $post_values) {
                             ?>
                         </tr>
                         <tr>
-                            <th><label for="price">Pris</label></th>
+                            <th><label for="price">Pris (bare tall er tillatt).</label></th>
                             <td>
                                 <input name="price" type="text" value="<?php
                                 if ($post_values['price']){
@@ -751,9 +749,9 @@ function show_adminpage_forms($categories, $post_values) {
                                 } else {
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
                                 }
-                                if ( $post_values['validation_errors']['ingredient'][($i)] ) {
+                                if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
                                     echo '<td><p>';
-                                    echo $post_values['validation_errors']['ingredient'][($i)];
+                                    echo $post_values['validation_errors']['ingredient'][$i]['ingredient_name'];
                                     echo '</p></td>';
                                 }
                                 echo "</tr>";
@@ -812,7 +810,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         $post_values['product_id'] = absint($_POST['prod_id']);
         $post_values['productname'] = sanitize_text_field($_POST['productname']);
         $post_values['category'] = absint($_POST['category']);
-        $post_values['price'] = absint($_POST['price']);
+        $post_values['price'] = sanitize_text_field($_POST['price']); //using sanitize_text_field and not absint because absint changes a string of only characters to 0.
         $post_values['price_type'] = absint($_POST['price_type']);
         $post_values['alt_txt'] = sanitize_text_field($_POST['alt_txt']);
         $post_values['image_url'] = $_FILES['product_image'];
@@ -823,16 +821,10 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 
         //validating the inputs as they are declared
         if (validate_product_name($post_values['productname']) !== NULL) {
-            $post_values['validation_errors']['product_name'] = validate_product_name($post_values);
-        }
-        if (validate_category($post_values['category']) !== NULL) {
-            $post_values['validation_errors']['category'] = validate_category($post_values['category']);
+            $post_values['validation_errors']['product_name'] = validate_product_name($post_values['productname']);
         }
         if (validate_price($post_values['price']) !== NULL) {
             $post_values['validation_errors']['price'] = validate_price($post_values['price']);
-        }
-        if (validate_price_type($post_values['price_type']) !== NULL) {
-            $post_values['validation_errors']['price_type'] = validate_price_type($post_values['price_type']);
         }
         if (validate_image_alt_txt($post_values['alt_txt']) !== NULL) {
             $post_values['validation_errors']['alt_txt'] = validate_image_alt_txt($post_values['alt_txt']);
@@ -858,12 +850,10 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 $count++;
             }
         } else {
-            $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
+            //TODO: uncomment this $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
         }
-
-
-
-
+        echo '<pre>';
+        var_dump($post_values['validation_errors']['ingredient']);
         //need if for checking if new image
 
         //how to delete image
@@ -1037,40 +1027,50 @@ function produktliste_setup_menu() {
 function validate_product_name($productname) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\% ]/";
     if ( $productname === "") {
-        return '<p>Mangler produktnavn.</p>';
+        return '<p>Produktnavn mangler.</p>';
+    } elseif ( preg_match($preg_pattern, $productname) ) {
+        return '<p>Bare store og små bokstaver, tall, parenteser, & og % er tillatt i produktnavnet.</p>';
     } elseif ( (strlen($productname) < 3) || (strlen($productname) > 200) ) {
         return '<p>Produktnavn må være mellom 3 og 200 bokstaver.</p>';
-    }elseif ( preg_match($preg_pattern, $post_values['product_name']) ) {
-        return '<p>Bare store og små bokstaver, tall, parenteser, & og % er tillatt.</p>';
     }
 }
 
-function validate_category($cat) {
-
-}
-
 function validate_price($price) {
-
-}
-
-function validate_price_type($price_type) {
-
+    $preg_pattern = "/d{1,5}/";
+    if ($price === "") {
+        return '<p>Pris mangler.</p>';
+    } elseif ( preg_match($preg_pattern, $price) ) {
+        return '<p>Bare tall er tillatt i prisen.</p>';
+    } elseif ( (strlen($price) < 1) || (strlen($price) > 5) ) {
+        return '<p>Pris må være mellom 1 og 5 tall.</p>';
+    }
 }
 
 function validate_image_alt_txt($img_alt_txt) {
-
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9 ]/";
+    if ( $img_alt_txt === "") {
+        return '<p>Alt-teksten til bildet mangler.</p>';
+    } elseif ( preg_match($preg_pattern, $img_alt_txt) ) {
+        return '<p>Bare store og små bokstaver og tall er tillatt i alt-teksten til bildet.</p>';
+    } elseif ( (strlen($img_alt_txt) < 3) || (strlen($img_alt_txt) > 100) ) {
+        return '<p>Alt-teksten til bildet må være mellom 3 og 100 bokstaver.</p>';
+    }
 }
 
 function validate_image($img) {
     $image_type_info =  wp_check_filetype_and_ext($file, $img['name']);
-
-}
-
-function validate_ingredient_number($ingredient_name) {
+    var_dump($image_type_info);
 
 }
 
 function validate_ingredient($ingredient_name) {
-
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\% ]/";
+    if ( $ingredient_name === "") {
+        return '<p>Ingrediensnavnet mangler.</p>';
+    } elseif ( preg_match($preg_pattern, $ingredient_name) ) {
+        return '<p>Bare store og små bokstaver, tall, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
+    } elseif ( (strlen($ingredient_name) < 3) || (strlen($ingredient_name) > 200) ) {
+        return '<p>Ingrediensnavnet må være mellom 3 og 200 bokstaver.</p>';
+    }
 }
 ?>
