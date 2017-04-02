@@ -22,6 +22,12 @@ function produktliste_drop_db() {
     $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
     $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
+//    //querying db for the product images stored in the media folder
+//    $produkt_images = $wpdb->get_results( "
+//          SELECT picture_url
+//          FROM {$table_name_main}
+//          ", ARRAY_A)or die ( $wpdb->last_error );
+
     $wpdb->query("DROP TABLE IF EXISTS $table_name_product_ingredients");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_main");
     $wpdb->query("DROP TABLE IF EXISTS $table_name_product_category");
@@ -553,11 +559,15 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
 }
 
 function show_adminpage_forms($categories, $post_values) {
+    //TODO:add logic for showing content based on the db
+    //first show category form, then if category exists, show new product form
+
     ?>
     <div>
         <div>
             <h1>Administrator side for Produktliste plugin</h1>
         </div>
+
 
         <!-- TODO: Legg til kategori valg. Legg til ny/Oppdaternavn/Slett Form -->
         <!--            <div class="form_wrapper_category">-->
@@ -749,6 +759,10 @@ function show_adminpage_forms($categories, $post_values) {
                                 } else {
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
                                 }
+                                if ($post_values['ingredient'][$i]['ingredient_id']) {
+
+                                    echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
+                                }
                                 if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
                                     echo '<td><p>';
                                     echo $post_values['validation_errors']['ingredient'][$i]['ingredient_name'];
@@ -794,8 +808,6 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         </div> <?php
         exit;
     } else {
-
-
         // Handle our form data
         //updating editing status for displaying correct text
         $editing_status = sanitize_text_field($_POST['editing_status']);
@@ -836,7 +848,14 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 } else {
                     $post_values['ingredient'][$count]['allergen'] = 0;
                 }
-                //only validating ingredient name since allergen is a boolean
+                if ($ingredient['ingredient_id']) {
+                    if ( absint($ingredient['ingredient_id']) !== 0 ) {
+                        $post_values['ingredient'][$count]['ingredient_id'] = absint($ingredient['ingredient_id']);
+                    }
+
+                }
+
+                //only validating ingredient name since allergen is a boolean and ingredient_id is an id number(
                 if (validate_ingredient($post_values['ingredient'][$count]['ingredient_name']) !== NULL) {
                     $post_values['validation_errors']['ingredient'][$count]['ingredient_name'] = validate_ingredient($post_values['ingredient'][$count]['ingredient_name']);
                 }
@@ -846,7 +865,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
             $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
         }
 
-        //if the user is editing an existing product and adds a new image OR creating a new product, add the image to post_values variable and validate it
+        //if the user is editing an existing product and adds a new image OR creating a new product; add the image to post_values variable and validate it
         if ( ( ($post_values['editing_status'] === TRUE) && ($_FILES['product_image']['error'] === 0) ) || (!$post_values['editing_status'] === TRUE) ) {
             $post_values['image'] = $_FILES['product_image'];
 
@@ -866,22 +885,29 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 
             } else {
                 //there are no errors: storing to db and outputting the success message
+                //adding functions for changing the file name
+                add_filter('wp_handle_upload_prefilter', 'image_filename_change_upload_filter' );
+                function image_filename_change_upload_filter( $img ){
+                    $img_info = pathinfo( $img['name'] );
+                    $img['name'] = sprintf('%s%s.%s','Produktliste-', current_time( 'Y-m-d-H-i-s' ), $img_info["extension"]);
+                    return $img;
+                }
+
+                //store image
+                $image_id = media_handle_upload('product_image', 0);
+                //checking for error uploading the file
+                if ( is_wp_error($image_id) ) {
+                    ?>
+                    <div class="error">
+                        <p>Opplasting av bildet feilet. Vennligst prøv igjen.!</p>
+                    </div>
+                    <?php
+                    return $post_values;
+                }
+
                 //new product
                 if (!$post_values['editing_status'] === TRUE) {
-                    //store image
-                    $image_id = media_handle_upload('product_image', 0);
-                    //checking for error uploading the file
-                    if ( is_wp_error($image_id) ) {
-                        ?>
-                        <div class="error">
-                            <p>Opplasting av bildet feilet. Vennligst prøv igjen.!</p>
-                        </div>
-                        <?php
-                        return $post_values;
-                    }
-
                     //store new product with reference to image
-                    //$wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients,
                     $wpdb->insert( $table_name_main, array(
                             'product_name' => $post_values['productname'],
                             'category' => $post_values['category'],
@@ -893,7 +919,6 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     );
                     $id_of_new_product = $wpdb->insert_id;
 
-                    //TODO: how to change filename?
                     foreach ($post_values['ingredient'] as $ingredient) {
                         $wpdb->insert( $table_name_product_ingredients, array(
                                 'product_id' => $id_of_new_product,
@@ -904,17 +929,68 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     }
                 } else {
                     //existing product with a new image
-                    //store image
-
                     //store new product with reference to image
+                    //delete old picture
+                    //TODO: not done saving existing prod
+                    $wpdb->update( $table_name_main,
+                            array(
+                                'product_name' => $post_values['productname'],
+                                'category' => $post_values['category'],
+                                'price' => $post_values['price'],
+                                'price_type' => $post_values['price_type'],
+                                'picture_url' => $image_id,
+                                'picture_alt_tag' => $post_values['alt_txt']
+                        ),  array('ID' => $post_values['product_id']),
+                            array( '%s', '%d', '%d', '%d', '%d', '%s' ),
+                            array( '%d' )
+                    );
+
+                    echo '<pre>';
+                    var_dump($post_values['ingredient']);
+                    echo '</pre>';
+
+                    foreach ($post_values['ingredient'] as $ingredient) {
+                        //if new ingredient(no ingredient_id)
+                        if (!$ingredient['ingredient_id']) {
+
+                            echo 'no id<br>';
+                            echo $ingredient['ingredient_name'].'<br>';
+                            echo $ingredient['allergen'].'<br>';
+                            echo $ingredient['ingredient_id'].'<br>';
+
+                            $wpdb->insert( $table_name_product_ingredients, array(
+                                    'product_id' => $post_values['product_id'],
+                                    'ingredient_name' => $ingredient['ingredient_name'],
+                                    'allergen' => $ingredient['allergen']
+                                ), array( '%d', '%s', '%d' )
+                            );
+                        } else {
+                            //else update(has ingredient id)
+
+                            echo 'has id<br>';
+                            echo $ingredient['ingredient_name'].'<br>';
+                            echo $ingredient['allergen'].'<br>';
+                            echo $ingredient['ingredient_id'].'<br>';
+                            
+                            $wpdb->update( $table_name_product_ingredients,
+                                array(
+                                    'ingredient_name' => $ingredient['ingredient_name'],
+                                    'allergen' => $ingredient['allergen']),
+                                array('ID' => $post_values['ingredient_id']),
+                                array( '%s', '%d' ),
+                                array( '%d' )
+                            );
+                        }
+
+
+                    }
+
+                    ?>
+                    <div class="updated">
+                        <p>Produkt lagret.</p>
+                    </div>
+                    <?php
                 }
-
-                ?>
-                <div class="updated">
-                    <p>Produkt lagret(nytt prod el eksisterende prod med nytt bildet)!</p>
-                </div>
-                <?php
-
             }
         } else {
             //output message depending on validation errors or not
@@ -984,7 +1060,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
 
         //querying db for data on the products ingredients
         $produkt_ingredients = $wpdb->get_results( $wpdb->prepare( "
-          SELECT i.ingredient_name, i.allergen 
+          SELECT i.id, i.ingredient_name, i.allergen 
           FROM {$table_name_main} m, {$table_name_product_ingredients} i 
           WHERE m.id = i.product_id 
           AND m.id = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
@@ -999,6 +1075,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         $post_values['image'] = $product['picture_url'];
 
         for ($i = 0; $i < count($produkt_ingredients); $i++) {
+            $post_values['ingredient'][$i]['ingredient_id'] = absint($produkt_ingredients[$i]['id']);
             $post_values['ingredient'][$i]['ingredient_name'] = $produkt_ingredients[$i]['ingredient_name'];
             $post_values['ingredient'][$i]['allergen'] = absint($produkt_ingredients[$i]['allergen']);
         }
