@@ -755,8 +755,10 @@ function show_adminpage_forms($categories, $post_values) {
                                         <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
                                         <td><input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
                                 if ( $post_values['ingredient'][$i]['allergen'] === 1) {
+                                    echo 'IT WORKS';
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
                                 } else {
+                                    echo 'IT DOESNT WORKS';
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
                                 }
                                 if ($post_values['ingredient'][$i]['ingredient_id']) {
