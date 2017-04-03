@@ -369,9 +369,9 @@ function show_produktliste() {
                             </div>
                         ";
                     }
-                    if ($product_in_category_count > 0) {
-                        echo $output;
-                    }
+                }
+                if ($product_in_category_count > 0) {
+                    echo $output;
                 }
             }
             ?>
@@ -476,11 +476,11 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
                                 </div>
                             ";
                     }
-                    if ($product_in_category_count > 0) {
-                        echo $output;
-                    } else {
-                        echo $output2;
-                    }
+                }
+                if ($product_in_category_count > 0) {
+                    echo $output;
+                } else {
+                    echo $output2;
                 }
             }
             ?>
@@ -641,10 +641,12 @@ function show_adminpage_forms($categories, $post_values) {
                             }
                             if ( ($post_values['image']) && ( !is_array($post_values['image']) ) ) {
                                 ?>
-                                <td>
-                                    <p>Nåværende bilde</p>
-                                    <img src="<?php echo esc_url(plugins_url( $post_values['image'], __FILE__ )); ?>"/> <!-- TODO: change to get attachments not urls -->
-                                </td>
+                                <tr>
+                                    <th>Nåværende bilde</th>
+                                    <td>
+                                        <img src="<?php echo wp_get_attachment_url( $post_values['image'] ); ?>" class="produktliste_existing_image"/>
+                                    </td>
+                                </tr>
                                 <?php
                             }
                             ?>
