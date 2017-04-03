@@ -24,7 +24,7 @@ function produktliste_drop_db() {
 
 //    //querying db for the product images stored in the media folder
 //    $produkt_images = $wpdb->get_results( "
-//          SELECT picture_url
+//          SELECT picture_id
 //          FROM {$table_name_main}
 //          ", ARRAY_A)or die ( $wpdb->last_error );
 
@@ -62,7 +62,7 @@ function produktliste_install() {
       product_name varchar(255) NOT NULL,
       price mediumint(9) NOT NULL,
       price_type boolean NOT NULL DEFAULT 0,
-      picture_url varchar(255) DEFAULT '' NOT NULL,
+      picture_id mediumint(9) NOT NULL,
       picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
       PRIMARY KEY  (id),
       FOREIGN KEY  (category) REFERENCES $table_name_product_category(category_id)
@@ -106,7 +106,7 @@ function produktliste_install() {
             product_name varchar(255) NOT NULL,
             price mediumint(9) NOT NULL,
             price_type boolean NOT NULL DEFAULT 0,
-            picture_url varchar(255) DEFAULT '' NOT NULL,
+            picture_id mediumint(9) NOT NULL,
             picture_alt_tag varchar(255) DEFAULT '' NOT NULL,
             PRIMARY KEY  (id),
             FOREIGN KEY  (category) REFERENCES $table_name_product_category(category_id)
@@ -127,7 +127,7 @@ function produktliste_install() {
     }
 }
 
-//function for creating 2 dummy items in 2 dummy categories
+//function for creating 2 dummy categories
 function produktliste_install_data() {
     global $wpdb;
 
@@ -147,155 +147,6 @@ function produktliste_install_data() {
         $table_name_product_category,
         array(
             'category_name' => 'Pølser'
-        )
-    );
-
-    //product table
-    $wpdb->insert(
-        $table_name_main,
-        array(
-            'category' => 1,
-            'product_name' => 'Elgstek',
-            'price' => 250,
-            'price_type' => 0,
-            'picture_url' => 'img/eksempel-bilde-1.png',
-            'picture_alt_tag' => 'Kort om bildet til produkt 1'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_main,
-        array(
-            'category' => 1,
-            'product_name' => 'Hjortestek',
-            'price' => 240,
-            'price_type' => 0,
-            'picture_url' => 'img/eksempel-bilde-2.png',
-            'picture_alt_tag' => 'Kort om bildet til produkt 2'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_main,
-        array(
-            'category' => 2,
-            'product_name' => 'Elgpølse',
-            'price' => 200,
-            'price_type' => 1,
-            'picture_url' => 'img/eksempel-bilde-3.png',
-            'picture_alt_tag' => 'Kort om bildet til produkt 3'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_main,
-        array(
-            'category' => 2,
-            'product_name' => 'Plagepølse',
-            'price' => 190,
-            'price_type' => 1,
-            'picture_url' => 'img/eksempel-bilde-4.png',
-            'picture_alt_tag' => 'Kort om bildet til produkt 4'
-        )
-    );
-
-    //ingredients table
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 1,
-            'ingredient_name' => 'Elgkjøtt',
-            'allergen' => 0
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 2,
-            'ingredient_name' => 'Elgkjøtt',
-            'allergen' => 0
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 2,
-            'ingredient_name' => 'Krydder Mix',
-            'allergen' => 1
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 2,
-            'ingredient_name' => 'Svinehjerter',
-            'allergen' => 0
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 2,
-            'ingredient_name' => 'Svinetunger',
-            'allergen' => 0
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 2,
-            'ingredient_name' => 'Storfekjøtt',
-            'allergen' => 0
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 2,
-            'ingredient_name' => 'Krydderblanding (Surhetsregulerende middel (E575), krydder, dekstrose (mais), Smaksforsterker (E621), Antioksidant (E301, E392, E300))',
-            'allergen' => 1
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 3,
-            'ingredient_name' => 'Elgkjøtt',
-            'allergen' => 0
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 3,
-            'ingredient_name' => 'Krydder Mix',
-            'allergen' => 1
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 4,
-            'ingredient_name' => 'Elgkjøtt',
-            'allergen' => 0
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_ingredients,
-        array(
-            'product_id' => 4,
-            'ingredient_name' => 'Krydder Mix',
-            'allergen' => 1
         )
     );
 }
@@ -359,6 +210,70 @@ function load_produktliste_js_admin($hook){
 /****************************************
  *   Functions for Outputting to HTML   *
  ***************************************/
+function show_create_new_or_edit_categories($categories) {
+//    if ( empty($categories) ) {
+//        ?>
+<!--        <div class="form_wrapper_category">-->
+<!--            <h2>Kategorier</h2>-->
+<!--            <form method="POST">-->
+<!--                <input type="hidden" name="new_category" value="true" />-->
+<!--                --><?php //wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
+<!--                <table>-->
+<!--                    <tbody>-->
+<!--                    <tr>-->
+<!--                        <th><label for="new_category"></label>Ny Kategori</th>-->
+<!--                        <td><input name="new_category" type="text" value="--><?php
+//                            if ($post_values['new_category']){
+//                                echo esc_attr( $post_values['new_category'] );
+//                            }?><!--" class="regular-text" />-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <th></th>-->
+<!--                        <td>-->
+<!--                            <p class="submit">-->
+<!--                                <input type="submit" name="new_category_submit" class="button button-primary button-large" value="Lagre ny kategori">-->
+<!--                            </p>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!---->
+<!--            </form>-->
+<!--        </div>-->
+<!--        --><?php
+//    } else {
+//        ?>
+<!--        <div class="form_wrapper_category">-->
+<!--            <h2>Kategorier</h2>-->
+<!--            <form method="POST">-->
+<!--                <input type="hidden" name="new_category" value="true" />-->
+<!--                --><?php //wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
+<!--                <table>-->
+<!--                    <tbody>-->
+<!--                    <tr>-->
+<!--                        <th><label for="new_category"></label>Ny Kategori</th>-->
+<!--                        <td><input name="new_category" type="text" value="--><?php
+//                            if ($post_values['new_category']){
+//                                echo esc_attr( $post_values['new_category'] );
+//                            }?><!--" class="regular-text" />-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <th></th>-->
+<!--                        <td>-->
+<!--                            <p class="submit">-->
+<!--                                <input type="submit" name="new_category" class="button button-primary button-large" value="Lagre ny kategori">-->
+<!--                            </p>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--        --><?php
+//    }
+}
 
 //function for building the html part for frontend productliste
 function show_produktliste() {
@@ -372,240 +287,250 @@ function show_produktliste() {
     $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
     //query the db for categories
-    $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A)
-    or die ( $wpdb->last_error );
+    $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A);
 
     //query the db for all products with category name
     $produktliste_results =  $wpdb->get_results("
-        SELECT id, category, product_name, price, price_type, picture_url, picture_alt_tag
+        SELECT id, category, product_name, price, price_type, picture_id, picture_alt_tag
         FROM    {$table_name_main}
-    ", ARRAY_A)or die ( $wpdb->last_error );
+    ", ARRAY_A);
 
     //query db for data on ingredients and allergens
     $ingredients = $wpdb->get_results("
         SELECT product_id, ingredient_name, allergen
         FROM    {$table_name_product_ingredients}
-    ", ARRAY_A)or die ( $wpdb->last_error );
+    ", ARRAY_A);
 
     //building the html output
-    ?>
-    <div class="produktliste_wrapper">
-        <div><h1 class="hv-header_first">Produkter</h1></div>
+    if ( empty($categories) || empty($produktliste_results) ) {
+        ?>
+        <div class="produktliste_wrapper">
+            <div><h1 class="hv-header_first">Produkter</h1></div>
+            <div><p>Det er ikke lagt til noen produkter i produktlisten.</p></div>
+        </div>
         <?php
-        //loop for each category
-        foreach ($categories as $category) {
-            ?>
-            <div class='produktliste_category_wrapper'>
-                <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
-                <?php
-                //loop for processing each product
-                foreach ($produktliste_results as $product) {
-                    if ($category['category_id'] === $product['category']){
-                        ?>
-                        <div class="accordion">
-                            <div class="accordion-thumbnail-div">
-                                <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
-                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
-                                     class="accordion-thumbnail"
-                                />
+    } else {
+        ?>
+        <div class="produktliste_wrapper">
+            <div><h1 class="hv-header_first">Produkter</h1></div>
+            <?php
+            //loop for each category
+            foreach ($categories as $category) {
+                $product_in_category_count = 0;
+                $output;
+
+                $output = "";
+                ?>
+                <div class='produktliste_category_wrapper'>
+                    <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
+                    <?php
+                    //loop for processing each product
+                    foreach ($produktliste_results as $product) {
+                        if ($category['category_id'] === $product['category']){
+                            ?>
+                            <div class="accordion">
+                                <div class="accordion-thumbnail-div">
+                                    <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
+                                         alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
+                                         class="accordion-thumbnail"
+                                    />
+                                </div>
+                                <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
+                                <div class="accordion-content"><?php echo esc_html( $product['price'] );
+                                    if ( $product['price_type'] == 0 ) {
+                                        echo 'kr/kg';
+                                    } elseif ($product['price_type'] == 1) {
+                                        echo 'kr/stk';
+                                    }
+                                    ?></div>
+                                <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
                             </div>
-                            <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
-                            <div class="accordion-content"><?php echo esc_html( $product['price'] );
-                                if ( $product['price_type'] == 0 ) {
-                                    echo 'kr/kg';
-                                } elseif ($product['price_type'] == 1) {
-                                    echo 'kr/stk';
-                                }
-                                ?></div>
-                            <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
-                        </div>
-                        <div class="panel">
-                            <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
-                                 alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
-                                 class="accordion-image"
-                            />
-                            <div class="accordion-list">
-                                <div><h3>Ingredienser</h3></div>
-                                <div>
-                                    <ul>
-                                        <?php
-                                        //loop for building the ingredients list
-                                        foreach ($ingredients as $ingredient) {
-                                            if ($product['id'] === $ingredient['product_id']) {
-                                                echo '<li>';
-                                                if ( $ingredient['allergen'] == 1 ) {
-                                                    echo '<b>';
-                                                    echo esc_html( $ingredient['ingredient_name'] );
-                                                    echo '</b>';
-                                                } else {
-                                                    echo esc_html( $ingredient['ingredient_name'] );
+                            <div class="panel">
+                                <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
+                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
+                                     class="accordion-image"
+                                />
+                                <div class="accordion-list">
+                                    <div><h3>Ingredienser</h3></div>
+                                    <div>
+                                        <ul>
+                                            <?php
+                                            //loop for building the ingredients list
+                                            foreach ($ingredients as $ingredient) {
+                                                if ($product['id'] === $ingredient['product_id']) {
+                                                    echo '<li>';
+                                                    if ( $ingredient['allergen'] == 1 ) {
+                                                        echo '<b>';
+                                                        echo esc_html( $ingredient['ingredient_name'] );
+                                                        echo '</b>';
+                                                    } else {
+                                                        echo esc_html( $ingredient['ingredient_name'] );
+                                                    }
+                                                    echo '</li>';
                                                 }
-                                                echo '</li>';
                                             }
-                                        }
-                                        ?>
-                                    </ul>
+                                            ?>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <?php
+                            <?php
+                        }
                     }
-                }
-                ?>
-            </div>
-            <?php
-        }
-        ?>
-    </div>
-    <?php
+                    ?>
+                </div>
+                <?php
+            }
+            ?>
+        </div>
+        <?php
+    }
 }
 
 //function for building the html part for admin page productliste
 function show_produktliste_admin($categories, $produktliste_results, $ingredients) {
-
-    //building the html output
-    ?>
-    <div class="produktliste_wrapper">
-        <div><h2 class="hv-header_first">Eksisterende produkter i Produktlisten</h2></div>
-        <?php
-        //loop for each category
-        foreach ($categories as $category) {
-            ?>
-            <div class='produktliste_category_wrapper'>
-                <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
-                <?php
-                //loop for processing each product
-                foreach ($produktliste_results as $product) {
-                    if ($category['category_id'] === $product['category']){
-                        ?>
-                        <div class="accordion">
-                            <div class="accordion-thumbnail-div">
-                                <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
-                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
-                                     class="accordion-thumbnail"
-                                />
-                            </div>
-                            <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
-                            <div class="accordion-content"><?php echo esc_html( $product['price'] );
-                                if ( $product['price_type'] == 0 ) {
-                                    echo 'kr/kg';
-                                } elseif ($product['price_type'] == 1) {
-                                    echo 'kr/stk';
-                                }
-                                ?></div>
-                            <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
-                        </div>
-                        <div class="panel">
-                            <img src="<?php echo esc_url(plugins_url( $product['picture_url'], __FILE__ )); ?>"
-                                 alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
-                                 class="accordion-image"
-                            />
-                            <div class="accordion-list">
-                                <div><h3>Ingredienser</h3></div>
-                                <div>
-                                    <ul>
-                                        <?php
-                                        //loop for building the ingredients list
-                                        foreach ($ingredients as $ingredient) {
-                                            if ($product['id'] === $ingredient['product_id']) {
-                                                echo '<li>';
-                                                if ( $ingredient['allergen'] == 1 ) {
-                                                    echo '<b>';
-                                                    echo esc_html( $ingredient['ingredient_name'] );
-                                                    echo '</b>';
-                                                } else {
-                                                    echo esc_html( $ingredient['ingredient_name'] );
-                                                }
-                                                echo '</li>';
-                                            }
-                                        }
-                                        ?>
-                                    </ul>
-                                </div>
-                                <div class="buttons_wrapper">
-                                    <div>
-                                        <form method="POST">
-                                            <input type="hidden" name="edit_product" value="true" />
-                                            <?php wp_nonce_field( 'produktliste_product_edit_update', 'produktliste_product_edit_form' ); ?>
-                                            <p class="submit">
-                                                <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
-                                                <input type="submit" name="edit_product_submit" class="button button-primary" value="Endre">
-                                            </p>
-                                        </form>
-                                    </div>
-                                    <div>
-                                        <form method="POST">
-                                            <input type="hidden" name="delete_product" value="true" />
-                                            <?php wp_nonce_field( 'produktliste_product_delete_update', 'produktliste_product_delete_form' ); ?>
-                                            <p class="submit">
-                                                <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
-                                                <input type="submit" name="delete_product_submit" class="button button-warning" value="Slett">
-                                            </p>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                }
-                ?>
-            </div>
-            <?php
-        }
+    if ( empty($produktliste_results) || empty($categories) ) {
         ?>
-    </div>
-    <?php
+        <div class="produktliste_wrapper">
+            <div><h1 class="hv-header_first">Eksisterende produkter i Produktlisten</h1></div>
+            <div><p>Det er ikke lagt til noen produkter i produktlisten.</p></div>
+        </div>
+        <?php
+    } else {
+        //building the html output
+        ?>
+        <div class="produktliste_wrapper">
+            <div><h2 class="hv-header_first">Eksisterende produkter i Produktlisten</h2></div>
+            <?php
+            //loop for each category
+            foreach ($categories as $category) {
+                ?>
+                <div class='produktliste_category_wrapper'>
+                    <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
+                    <?php
+                    //loop for processing each product
+                    foreach ($produktliste_results as $product) {
+                        if ($category['category_id'] === $product['category']){
+                            ?>
+                            <div class="accordion">
+                                <div class="accordion-thumbnail-div">
+                                    <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
+                                         alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
+                                         class="accordion-thumbnail"
+                                    />
+                                </div>
+                                <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
+                                <div class="accordion-content"><?php echo esc_html( $product['price'] );
+                                    if ( $product['price_type'] == 0 ) {
+                                        echo 'kr/kg';
+                                    } elseif ($product['price_type'] == 1) {
+                                        echo 'kr/stk';
+                                    }
+                                    ?></div>
+                                <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
+                            </div>
+                            <div class="panel">
+                                <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
+                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
+                                     class="accordion-image"
+                                />
+                                <div class="accordion-list">
+                                    <div><h3>Ingredienser</h3></div>
+                                    <div>
+                                        <ul>
+                                            <?php
+                                            //loop for building the ingredients list
+                                            foreach ($ingredients as $ingredient) {
+                                                if ($product['id'] === $ingredient['product_id']) {
+                                                    echo '<li>';
+                                                    if ( $ingredient['allergen'] == 1 ) {
+                                                        echo '<b>';
+                                                        echo esc_html( $ingredient['ingredient_name'] );
+                                                        echo '</b>';
+                                                    } else {
+                                                        echo esc_html( $ingredient['ingredient_name'] );
+                                                    }
+                                                    echo '</li>';
+                                                }
+                                            }
+                                            ?>
+                                        </ul>
+                                    </div>
+                                    <div class="buttons_wrapper">
+                                        <div>
+                                            <form method="POST">
+                                                <input type="hidden" name="edit_product" value="true" />
+                                                <?php wp_nonce_field( 'produktliste_product_edit_update', 'produktliste_product_edit_form' ); ?>
+                                                <p class="submit">
+                                                    <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
+                                                    <input type="submit" name="edit_product_submit" class="button button-primary" value="Endre">
+                                                </p>
+                                            </form>
+                                        </div>
+                                        <div>
+                                            <form method="POST">
+                                                <input type="hidden" name="delete_product" value="true" />
+                                                <?php wp_nonce_field( 'produktliste_product_delete_update', 'produktliste_product_delete_form' ); ?>
+                                                <p class="submit">
+                                                    <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
+                                                    <input type="submit" name="delete_product_submit" class="button button-warning" value="Slett">
+                                                </p>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php
+                        }
+                    }
+                    ?>
+                </div>
+                <?php
+            }
+            ?>
+        </div>
+        <?php
+    }
 }
 
 function show_adminpage_forms($categories, $post_values) {
     //TODO:add logic for showing content based on the db
     //first show category form, then if category exists, show new product form
-
     ?>
     <div>
         <div>
             <h1>Administrator side for Produktliste plugin</h1>
         </div>
+        <?php
 
+        show_create_new_or_edit_categories($categories);
 
-        <!-- TODO: Legg til kategori valg. Legg til ny/Oppdaternavn/Slett Form -->
-        <!--            <div class="form_wrapper_category">-->
-        <!--                <h2>Forandre kategori navn</h2>-->
-        <!--                <form method="POST">-->
-        <!--                    <div>-->
-        <!--                        <label for="selCat">Velg Kategori</label>-->
-        <!--                        <select class="form-control" name="category" id="selCat">-->
-        <!--                            --><?php //category_selects($categories, $cat); ?>
-        <!--                        </select>-->
-        <!--                    </div>-->
-        <!--                </form>-->
-        <!--            </div>-->
-
-        <div class="form_wrapper_product">
-            <?php
-            if ($post_values['editing_status'] === TRUE) {
-                echo '<h2>Endre produkt</h2>';
-            } else {
-                echo '<h2>Legg til nytt produkt</h2>';
-            }
+        if (!empty($categories)) {
             ?>
-            <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="main_form_updated" value="true" />
-                <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
+            <div class="form_wrapper_product">
+                <?php
                 if ($post_values['editing_status'] === TRUE) {
-                    echo '<input type="hidden" name="editing_status" value="true" />';
+                    echo '<h2>Endre produkt</h2>';
                 } else {
-                    echo '<input type="hidden" name="editing_status" value="false" />';
-                }
-                if ($post_values['product_id']) {
-                    echo '<input type="hidden" name="prod_id" value="'. esc_attr( $post_values["product_id"] ) .'" />';
-                } else {
-                    echo '<input type="hidden" name="prod_id" value="" />';
+                    echo '<h2>Legg til nytt produkt</h2>';
                 }
                 ?>
-                <table> <!-- TODO: check if needed for styling:  class="form-table" -->
-                    <tbody>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="main_form_updated" value="true" />
+                    <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
+                    if ($post_values['editing_status'] === TRUE) {
+                        echo '<input type="hidden" name="editing_status" value="true" />';
+                    } else {
+                        echo '<input type="hidden" name="editing_status" value="false" />';
+                    }
+                    if ($post_values['product_id']) {
+                        echo '<input type="hidden" name="prod_id" value="'. esc_attr( $post_values["product_id"] ) .'" />';
+                    } else {
+                        echo '<input type="hidden" name="prod_id" value="" />';
+                    }
+                    ?>
+                    <table> <!-- TODO: check if needed for styling:  class="form-table" -->
+                        <tbody>
                         <tr>
                             <th><label for="productname">Produktnavn</label></th>
                             <td><input name="productname" type="text" value="<?php
@@ -728,10 +653,10 @@ function show_adminpage_forms($categories, $post_values) {
                             }
                             ?>
                         </tr>
-                    </tbody>
-                </table>
-                <table> <!-- TODO: check if needed for styling:  class="form-table" -->
-                    <tbody>
+                        </tbody>
+                    </table>
+                    <table> <!-- TODO: check if needed for styling:  class="form-table" -->
+                        <tbody>
                         <tr>
                             <th><h3>Ingredienser</h3></th>
                             <td></td>
@@ -776,26 +701,50 @@ function show_adminpage_forms($categories, $post_values) {
                             <th></th>
                             <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
                         </tr>
-                    </tbody>
-                </table>
-                <p class="submit">
-                    <input type="submit" name="submit" class="button button-primary button-large" value="Lagre Produkt">
-                </p>
-            </form>
-            <form method="POST">
-                <p class="submit">
-                    <input type="submit" name="reset" class="button" value="Reset siden">
-                </p>
-            </form>
-        </div>
+                        </tbody>
+                    </table>
+                    <p class="submit">
+                        <input type="submit" name="submit" class="button button-primary button-large" value="Lagre Produkt">
+                    </p>
+                </form>
+                <form method="POST">
+                    <p class="submit">
+                        <input type="submit" name="reset" class="button" value="Reset siden">
+                    </p>
+                </form>
+            </div>
+            <?php
+        }
+        ?>
     </div>
-
     <?php
 }
 
 /**********************************************************
  *   Functions for building and processing the adminpage  *
  *********************************************************/
+//processing POST to the plugin page from the category form (new category)
+function produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values) {
+    if(
+        ! isset( $_POST['produktliste_new_category_update'] ) ||
+        ! wp_verify_nonce( $_POST['produktliste_new_category_form'], 'produktliste_new_category_update' )
+    ){ ?>
+        <div class="error">
+            <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
+        </div> <?php
+        exit;
+    } else {
+        // Handle our form data
+
+        //outputting the success message
+        ?>
+        <div class="updated">
+            <p>Delete Button Clicked for Product with ID: <?php echo esc_html( $_POST['product_id'] ); ?>.</p>
+        </div> <?php
+
+    }
+}
+
 //processing POST to the plugin page from the main form
 //TODO: Add check for what the current user can do!
 function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values) {
@@ -913,7 +862,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                             'category' => $post_values['category'],
                             'price' => $post_values['price'],
                             'price_type' => $post_values['price_type'],
-                            'picture_url' => $image_id,
+                            'picture_id' => $image_id,
                             'picture_alt_tag' => $post_values['alt_txt']
                         ), array( '%s', '%d', '%d', '%d', '%d', '%s' )
                     );
@@ -931,7 +880,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     //existing product with a new image
                     //grabbing old image id for deleting later
                     $old_image_id = $wpdb->get_row( $wpdb->prepare( "
-                    SELECT picture_url
+                    SELECT picture_id
                     FROM {$table_name_main}
                     WHERE ID = %d", $post_values['product_id']), ARRAY_A)or die ( $wpdb->last_error );
 
@@ -941,7 +890,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                                 'category' => $post_values['category'],
                                 'price' => $post_values['price'],
                                 'price_type' => $post_values['price_type'],
-                                'picture_url' => $image_id,
+                                'picture_id' => $image_id,
                                 'picture_alt_tag' => $post_values['alt_txt']
                         ),  array('ID' => $post_values['product_id']),
                             array( '%s', '%d', '%d', '%d', '%d', '%s' ),
@@ -969,7 +918,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                             );
                         }
                         //delete old picture
-                        wp_delete_attachment( $old_image_id['picture_url'] );
+                        wp_delete_attachment( $old_image_id['picture_id'] );
                     }
                     ?>
                     <div class="updated">
@@ -1052,7 +1001,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         //querying db for data on the product
         $product_id = absint($_POST['product_id']);
         $product = $wpdb->get_row( $wpdb->prepare( "
-          SELECT m.id, m.category, c.category_name, m.product_name, m.price, m.price_type, m.picture_url, m.picture_alt_tag 
+          SELECT m.id, m.category, c.category_name, m.product_name, m.price, m.price_type, m.picture_id, m.picture_alt_tag 
           FROM {$table_name_main} m, {$table_name_product_category} c 
           WHERE m.category = c.category_id 
           AND ID = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
@@ -1071,7 +1020,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         $post_values['price'] = $product['price'];
         $post_values['price_type'] = $product['price_type'];
         $post_values['alt_txt'] = $product['picture_alt_tag'];
-        $post_values['image'] = $product['picture_url'];
+        $post_values['image'] = $product['picture_id'];
 
         for ($i = 0; $i < count($produkt_ingredients); $i++) {
             $post_values['ingredient'][$i]['ingredient_id'] = absint($produkt_ingredients[$i]['id']);
@@ -1133,26 +1082,41 @@ function produktliste_setup_menu() {
             produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
         }
 
+        //Checking for 'new_category' to process the form on POST
+        if( $_POST['new_category'] === 'true' ){
+            echo 'yes';
+            produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values);
+        }
+
+        //Checking for 'delete_product' to process the form on POST
+        if( $_POST[''] === 'true' ){
+            produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
+        }
+
+        //Checking for 'delete_product' to process the form on POST
+        if( $_POST[''] === 'true' ){
+            produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
+        }
+
         //declaring variables and querying db for needed information
         $categories;
         $produktliste_results;
         $ingredients;
 
         //query the db for categories
-        $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A)
-        or die ( $wpdb->last_error );
+        $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A);
 
         //query the db for all products
         $produktliste_results =  $wpdb->get_results("
-            SELECT id, category, product_name, price, price_type, picture_url, picture_alt_tag
+            SELECT id, category, product_name, price, price_type, picture_id, picture_alt_tag
             FROM    {$table_name_main}
-        ", ARRAY_A)or die ( $wpdb->last_error );
+        ", ARRAY_A);
 
         //query db for data on ingredients and allergens
         $ingredients = $wpdb->get_results("
             SELECT product_id, ingredient_name, allergen
             FROM    {$table_name_product_ingredients}
-        ", ARRAY_A)or die ( $wpdb->last_error );
+        ", ARRAY_A);
 
         show_adminpage_forms($categories, $post_values);
         show_produktliste_admin($categories, $produktliste_results, $ingredients);
