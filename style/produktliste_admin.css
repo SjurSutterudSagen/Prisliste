@@ -1,73 +1,114 @@
-/* For the accordian */
+/**
+ * Created by Sjur on 17.03.2017.
+ * Copied from what Jonas had done earlier.
+ * Edit by Dag-Roger on 03.04.2017
+ */
+
+ div.produktliste_wrapper {
+
+ }
+
 div.accordion {
-    background-color: #eee;
-    color: #444;
-    cursor: pointer;
-    height: 25px;
-    padding-top: 18px;
-    padding-bottom: 57px;
-    padding-left: 18px;
-    margin-top: 2px;
-    font-size: 1.2em;
-    transition: 0.4s;
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  height: 25px;
+  padding-top: 18px;
+  padding-bottom: 57px;
+  padding-left: 18px;
+  margin-top: 2px;
+  font-size: 1.2em;
+  transition: 0.4s;
+}
+
+div.accordion.active, div.accordion:hover {
+  background-color: #218223;
+  color: #fff;
 }
 
 div.accordion-content {
-    width: 30%; /* Sett til 30% med thumbnail, hvis den tar 10%*/
-    float: left;
-    margin: 0;
-    padding: 0;
-}
-
-
-.accordion-thumbnail {
-    width: 74px;
-    height: auto;
-    margin: -18px;
-}
-
-.thumbnail-hide {
-    visibility: hidden;
+  width: 33%; /* Sett til 30% med thumbnail, hvis den tar 10%*/
+  float: left;
+  margin: 0;
+  padding: 0;
 }
 
 .accordion-thumbnail-div {
+  visibility: hidden;
+  display: none;
+}
+
+.accordion-thumbnail {
+  width: 74px;
+  height: auto;
+  margin: -18px;
+}
+
+.thumbnail-hide {
+  visibility: hidden;
+}
+
+i.icon-placement {
+  float: right;
+  margin-right: 15px;
+}
+
+
+div.panel {
+  padding: 0;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+img.accordion-image {
+  width: 100%;
+  height: auto;
+  float: left;
+  padding: 0;
+  margin: 0;
+}
+
+.accordion-list {
+  width: 73%;
+  float: left;
+  padding-left: 2%;
+  margin: 0;
+}
+
+.panel h3 {
+  margin-top: 15px;
+}
+
+@media screen and (min-width: 480px) {
+  div.accordion-content {
+    width: 30%;
+  }
+
+  .accordion-thumbnail-div {
     width: 10%;
     float: left;
     margin: 0;
     padding: 0;
-}
+    visibility: visible;
+    display: block;
+  }
 
-div.accordion.active, div.accordion:hover {
-    background-color: #ddd;
-}
+  img.accordion-image {
+      width: 35%;
+  }
 
-div.panel {
-    padding: 0;
-    background-color: white;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.2s ease-out;
-}
-
-i.icon-placement {
-    float: right;
-    margin-right: 15px;
-}
-
-img.accordion-image {
-    width: 25%;
-    float: left;
-    padding: 0;
-    margin: 0;
-}
-
-.accordion-list {
-    width: 73%;
+  .accordion-list {
+    width: 63%;
     float: left;
     padding-left: 2%;
     margin: 0;
+  }
 }
 
-h3 {
-    margin-top: 0;
+@media screen and (min-width: 1200px) {
+  div.produktliste_wrapper {
+    width: 80%;
+  }
 }
