@@ -722,7 +722,7 @@ function show_adminpage_forms($categories, $post_values) {
                                 ?>
                                 <td>
                                     <p>Nåværende bilde</p>
-                                    <img src="<?php echo esc_url(plugins_url( $post_values['image'], __FILE__ )); ?>"/>
+                                    <img src="<?php echo esc_url(plugins_url( $post_values['image'], __FILE__ )); ?>"/> <!-- TODO: change to get attachments not urls -->
                                 </td>
                                 <?php
                             }
@@ -755,10 +755,8 @@ function show_adminpage_forms($categories, $post_values) {
                                         <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
                                         <td><input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
                                 if ( $post_values['ingredient'][$i]['allergen'] === 1) {
-                                    echo 'IT WORKS';
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
                                 } else {
-                                    echo 'IT DOESNT WORKS';
                                     echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
                                 }
                                 if ($post_values['ingredient'][$i]['ingredient_id']) {
@@ -931,9 +929,12 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     }
                 } else {
                     //existing product with a new image
-                    //store new product with reference to image
-                    //delete old picture
-                    //TODO: not done saving existing prod
+                    //grabbing old image id for deleting later
+                    $old_image_id = $wpdb->get_row( $wpdb->prepare( "
+                    SELECT picture_url
+                    FROM {$table_name_main}
+                    WHERE ID = %d", $post_values['product_id']), ARRAY_A)or die ( $wpdb->last_error );
+
                     $wpdb->update( $table_name_main,
                             array(
                                 'product_name' => $post_values['productname'],
@@ -947,19 +948,9 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                             array( '%d' )
                     );
 
-                    echo '<pre>';
-                    var_dump($post_values['ingredient']);
-                    echo '</pre>';
-
                     foreach ($post_values['ingredient'] as $ingredient) {
                         //if new ingredient(no ingredient_id)
                         if (!$ingredient['ingredient_id']) {
-
-                            echo 'no id<br>';
-                            echo $ingredient['ingredient_name'].'<br>';
-                            echo $ingredient['allergen'].'<br>';
-                            echo $ingredient['ingredient_id'].'<br>';
-
                             $wpdb->insert( $table_name_product_ingredients, array(
                                     'product_id' => $post_values['product_id'],
                                     'ingredient_name' => $ingredient['ingredient_name'],
@@ -968,25 +959,18 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                             );
                         } else {
                             //else update(has ingredient id)
-
-                            echo 'has id<br>';
-                            echo $ingredient['ingredient_name'].'<br>';
-                            echo $ingredient['allergen'].'<br>';
-                            echo $ingredient['ingredient_id'].'<br>';
-                            
                             $wpdb->update( $table_name_product_ingredients,
                                 array(
                                     'ingredient_name' => $ingredient['ingredient_name'],
                                     'allergen' => $ingredient['allergen']),
-                                array('ID' => $post_values['ingredient_id']),
+                                array('ID' => $ingredient['ingredient_id']),
                                 array( '%s', '%d' ),
                                 array( '%d' )
                             );
                         }
-
-
+                        //delete old picture
+                        wp_delete_attachment( $old_image_id['picture_url'] );
                     }
-
                     ?>
                     <div class="updated">
                         <p>Produkt lagret.</p>
@@ -995,6 +979,8 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 }
             }
         } else {
+            //existing product with no new image
+
             //output message depending on validation errors or not
             if ( count($post_values['validation_errors']) !== 0){
                 //if there are errors
@@ -1003,40 +989,51 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     <p>Vennligst fiks feilene!</p>
                 </div>
                 <?php
-
-
                 return $post_values;
 
             } else {
                 //there are no errors: storing to db and outputting the success message
+                $wpdb->update( $table_name_main,
+                    array(
+                        'product_name' => $post_values['productname'],
+                        'category' => $post_values['category'],
+                        'price' => $post_values['price'],
+                        'price_type' => $post_values['price_type'],
+                        'picture_alt_tag' => $post_values['alt_txt']
+                    ),  array('ID' => $post_values['product_id']),
+                    array( '%s', '%d', '%d', '%d', '%s' ),
+                    array( '%d' )
+                );
 
-
+                foreach ($post_values['ingredient'] as $ingredient) {
+                    //if new ingredient(no ingredient_id)
+                    if (!$ingredient['ingredient_id']) {
+                        $wpdb->insert($table_name_product_ingredients, array(
+                            'product_id' => $post_values['product_id'],
+                            'ingredient_name' => $ingredient['ingredient_name'],
+                            'allergen' => $ingredient['allergen']
+                        ), array('%d', '%s', '%d')
+                        );
+                    } else {
+                        //else update(has ingredient id)
+                        $wpdb->update($table_name_product_ingredients,
+                            array(
+                                'ingredient_name' => $ingredient['ingredient_name'],
+                                'allergen' => $ingredient['allergen']),
+                            array('ID' => $ingredient['ingredient_id']),
+                            array('%s', '%d'),
+                            array('%d')
+                        );
+                    }
+                }
                 ?>
                 <div class="updated">
-                    <p>Produkt lagret eksisterende prod uten bilde!</p>
+                    <p>Produkt lagret.</p>
                 </div>
                 <?php
 
             }
         }
-
-
-
-        //need if for checking if new image
-
-        //how to delete image
-        //$old_image_file_name = get current from db
-        //insert new image filename from the approved upload in db
-        //unlink($old_image_file_name);
-
-        //storing the data
-        //TODO: Add storing logic for both products and ingredients
-
-//        if editing_status and new image () {
-//
-//        } elseif (editing_status)
-
-
     }
 }
 
