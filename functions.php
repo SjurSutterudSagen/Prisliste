@@ -271,6 +271,33 @@ function show_create_new_or_edit_categories($categories) {
                     </tbody>
                 </table>
             </form>
+            <form method="POST">
+                <input type="hidden" name="edit_category" value="true" />
+                <?php wp_nonce_field( 'produktliste_edit_category_update', 'produktliste_edit_category_form' ); ?>
+                <table class="form-table">
+                    <tbody>
+                    <tr>
+                        <th><label for="edit_category"></label>Nåværende kategorier</th>
+                        <td><input name="edit_category" type="text" value="<?php
+                            if ($post_values['new_category']){
+                                echo esc_attr( $post_values['new_category'] );
+                            }?>" class="regular-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <td>
+                            <p class="submit">
+                                <input type="submit" name="edit_category" class="button button-primary" value="Endre kategori">
+                            </p>
+                            <p class="submit">
+                                <input type="submit" name="delete_category" class="delete button" value="Slett kategori">
+                            </p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
         </div>
         <?php
     }
@@ -709,10 +736,11 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
     if(
         ! isset( $_POST['produktliste_new_category_update'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_new_category_form'], 'produktliste_new_category_update' )
-    ){ ?>
+    ){  ?>
         <div class="error">
             <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
-        </div> <?php
+        </div>
+        <?php
         exit;
     } else {
         // Handle our form data
@@ -720,9 +748,9 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
         //outputting the success message
         ?>
         <div class="updated">
-            <p>Delete Button Clicked for Product with ID: <?php echo esc_html( $_POST['product_id'] ); ?>.</p>
-        </div> <?php
-
+            <p>Lagret ny kategori.</p>
+        </div>
+        <?php
     }
 }
 
