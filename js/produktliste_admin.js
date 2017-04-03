@@ -53,7 +53,7 @@
                 "<tr>" +
                 "<th><label for='ingredient[" + count + "]'>Ingrediens " + count + "</label></th>" +
                 "<td><input name='ingredient[" + count + "][" + 'ingredient_name' + "]' type='text' value='' class='regular-text' /></td>" +
-                "<td><input name='ingredient[" + count + "][" + 'ingredient_allergen' + "]' type='checkbox' value='true' class='regular-text' /></td>" +
+                "<td><input name='ingredient[" + count + "][" + 'allergen' + "]' type='checkbox' value='1' class='regular-text' /></td>" +
                 "</tr>"
             ).insertBefore( '#ingredients_wrapper' );
         });

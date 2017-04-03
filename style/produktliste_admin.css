@@ -1,0 +1,73 @@
+/* For the accordian */
+div.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    height: 25px;
+    padding-top: 18px;
+    padding-bottom: 57px;
+    padding-left: 18px;
+    margin-top: 2px;
+    font-size: 1.2em;
+    transition: 0.4s;
+}
+
+div.accordion-content {
+    width: 30%; /* Sett til 30% med thumbnail, hvis den tar 10%*/
+    float: left;
+    margin: 0;
+    padding: 0;
+}
+
+
+.accordion-thumbnail {
+    width: 74px;
+    height: auto;
+    margin: -18px;
+}
+
+.thumbnail-hide {
+    visibility: hidden;
+}
+
+.accordion-thumbnail-div {
+    width: 10%;
+    float: left;
+    margin: 0;
+    padding: 0;
+}
+
+div.accordion.active, div.accordion:hover {
+    background-color: #ddd;
+}
+
+div.panel {
+    padding: 0;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+i.icon-placement {
+    float: right;
+    margin-right: 15px;
+}
+
+img.accordion-image {
+    width: 25%;
+    float: left;
+    padding: 0;
+    margin: 0;
+}
+
+.accordion-list {
+    width: 73%;
+    float: left;
+    padding-left: 2%;
+    margin: 0;
+}
+
+h3 {
+    margin-top: 0;
+}
