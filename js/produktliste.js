@@ -27,12 +27,12 @@
                     var hv_arrow = this.getElementsByClassName("fa");
                     hv_arrow[0].classList.toggle("fa-chevron-down");
                     hv_arrow[0].classList.toggle("fa-chevron-up");
-                }
+                };
             }
 
             Element.prototype.remove = function() {
                 this.parentElement.removeChild(this);
-            }
+            };
 
             NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
                 for(var i = this.length - 1; i >= 0; i--) {
@@ -40,7 +40,7 @@
                         this[i].parentElement.removeChild(this[i]);
                     }
                 }
-            }
+            };
 
     } );
 
