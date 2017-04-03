@@ -210,6 +210,7 @@ function load_produktliste_js_admin($hook){
 /****************************************
  *   Functions for Outputting to HTML   *
  ***************************************/
+//function for building the html part for category inputs on the admin page for the plugin
 function show_create_new_or_edit_categories($categories) {
     if ( empty($categories) ) {
         ?>
@@ -249,7 +250,7 @@ function show_create_new_or_edit_categories($categories) {
             <form method="POST">
                 <input type="hidden" name="new_category" value="true" />
                 <?php wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
-                <table>
+                <table class="form-table">
                     <tbody>
                     <tr>
                         <th><label for="new_category"></label>Ny Kategori</th>
@@ -490,8 +491,6 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
 }
 
 function show_adminpage_forms($categories, $post_values) {
-    //TODO:add logic for showing content based on the db
-    //first show category form, then if category exists, show new product form
     ?>
     <div>
         <div>
@@ -525,7 +524,7 @@ function show_adminpage_forms($categories, $post_values) {
                         echo '<input type="hidden" name="prod_id" value="" />';
                     }
                     ?>
-                    <table> <!-- TODO: check if needed for styling:  class="form-table" -->
+                    <table class="form-table">
                         <tbody>
                         <tr>
                             <th><label for="productname">Produktnavn</label></th>
@@ -533,15 +532,16 @@ function show_adminpage_forms($categories, $post_values) {
                                 if ($post_values['productname']){
                                     echo esc_attr( $post_values['productname'] );
                                 }?>" class="regular-text" />
+                                <?php
+                                //if there is a product name error message
+                                if (count($post_values['validation_errors']['product_name'])) {
+                                    echo '<p>';
+                                    echo $post_values['validation_errors']['product_name'];
+                                    echo '</p>';
+                                }
+                                ?>
                             </td>
-                            <?php
-                            //if there is a product name error message
-                            if (count($post_values['validation_errors']['product_name'])) {
-                                echo '<td><p>';
-                                echo $post_values['validation_errors']['product_name'];
-                                echo '</p></td>';
-                            }
-                            ?>
+
                         </tr>
                         <tr>
                             <th><label for="category">Kategori</label></th>
@@ -558,14 +558,6 @@ function show_adminpage_forms($categories, $post_values) {
                                     ?>
                                 </select>
                             </td>
-                            <?php
-                            //if there is a product name error message
-                            if (count($post_values['validation_errors']['category'])) {
-                                echo '<td><p>';
-                                echo $post_values['validation_errors']['category'];
-                                echo '</p></td>';
-                            }
-                            ?>
                         </tr>
                         <tr>
                             <th><label for="price">Pris (bare tall er tillatt).</label></th>
@@ -574,15 +566,15 @@ function show_adminpage_forms($categories, $post_values) {
                                 if ($post_values['price']){
                                     echo esc_attr( $post_values['price'] );
                                 }?>" class="regular-text" />
+                                <?php
+                                //if there is a product name error message
+                                if (count($post_values['validation_errors']['price'])) {
+                                    echo '<p>';
+                                    echo $post_values['validation_errors']['price'];
+                                    echo '</p>';
+                                }
+                                ?>
                             </td>
-                            <?php
-                            //if there is a product name error message
-                            if (count($post_values['validation_errors']['price'])) {
-                                echo '<td><p>';
-                                echo $post_values['validation_errors']['price'];
-                                echo '</p></td>';
-                            }
-                            ?>
                         </tr>
                         <tr>
                             <th><label for="price_type">Pristype</label></th>
@@ -602,14 +594,6 @@ function show_adminpage_forms($categories, $post_values) {
                                     ?>
                                 </select>
                             </td>
-                            <?php
-                            //if there is a product name error message
-                            if (count($post_values['validation_errors']['price_type'])) {
-                                echo '<td><p>';
-                                echo $post_values['validation_errors']['price_type'];
-                                echo '</p></td>';
-                            }
-                            ?>
                         </tr>
                         <tr>
                             <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
@@ -617,28 +601,31 @@ function show_adminpage_forms($categories, $post_values) {
                                 if ($post_values['alt_txt']){
                                     echo esc_attr( $post_values['alt_txt'] );
                                 }?>" class="regular-text" />
+                                <?php
+                                //if there is a product name error message
+                                if (count($post_values['validation_errors']['alt_txt'])) {
+                                    echo '<p>';
+                                    echo $post_values['validation_errors']['alt_txt'];
+                                    echo '</p>';
+                                }
+                                ?>
                             </td>
-                            <?php
-                            //if there is a product name error message
-                            if (count($post_values['validation_errors']['alt_txt'])) {
-                                echo '<td><p>';
-                                echo $post_values['validation_errors']['alt_txt'];
-                                echo '</p></td>';
-                            }
-                            ?>
+
                         </tr>
                         <tr>
                             <th><label for="product_image">Last opp bilde</label></th>
                             <td>
                                 <input type="file" name="product_image">
+                                <?php
+                                //if there is a product image error message
+                                if (count($post_values['validation_errors']['product_image'])) {
+                                    echo '<p>';
+                                    echo $post_values['validation_errors']['product_image'];
+                                    echo '</p>';
+                                }
+                                ?>
                             </td>
                             <?php
-                            //if there is a product name error message
-                            if (count($post_values['validation_errors']['product_image'])) {
-                                echo '<td><p>';
-                                echo $post_values['validation_errors']['product_image'];
-                                echo '</p></td>';
-                            }
                             if ( ($post_values['image']) && ( !is_array($post_values['image']) ) ) {
                                 ?>
                                 <tr>
@@ -653,7 +640,7 @@ function show_adminpage_forms($categories, $post_values) {
                         </tr>
                         </tbody>
                     </table>
-                    <table> <!-- TODO: check if needed for styling:  class="form-table" -->
+                    <table class="form-table">
                         <tbody>
                         <tr>
                             <th><h3>Ingredienser</h3></th>
@@ -663,34 +650,30 @@ function show_adminpage_forms($categories, $post_values) {
                         <?php
                         //if no ingredients were added for a new product
                         if ($post_values['validation_errors']['ingredients_number']) {
-                            ?>
-                            <tr>
-                                <th></th>
-                                <td><?php echo $post_values['validation_errors']['ingredients_number'];?></td>
-                            </tr>
-
-                            <?php
+                            echo '<tr><th></th><td>';
+                            echo $post_values['validation_errors']['ingredients_number'];
+                            echo '</td></tr>';
                         }
                         //loop for ingredients
                         if ( count($post_values['ingredient']) !== 0) {
                             for ($i = 0; $i < count($post_values['ingredient']); $i++) {
                                 echo "<tr> 
-                                        <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
-                                        <td><input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' /></td>";
-                                if ( $post_values['ingredient'][$i]['allergen'] === 1) {
-                                    echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
-                                } else {
-                                    echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
-                                }
-                                if ($post_values['ingredient'][$i]['ingredient_id']) {
+                                    <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
+                                    <td>
+                                        <input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' />";
+                                        if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
+                                            echo '<p>' . $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] . '</p>';
+                                        }
+                                    echo "</td>";
+                                    if ( $post_values['ingredient'][$i]['allergen'] === 1) {
+                                        echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
+                                    } else {
+                                        echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
+                                    }
+                                    if ($post_values['ingredient'][$i]['ingredient_id']) {
 
-                                    echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
-                                }
-                                if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
-                                    echo '<td><p>';
-                                    echo $post_values['validation_errors']['ingredient'][$i]['ingredient_name'];
-                                    echo '</p></td>';
-                                }
+                                        echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
+                                    }
                                 echo "</tr>";
                             }
                         }
