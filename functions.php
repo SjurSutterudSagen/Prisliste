@@ -211,68 +211,68 @@ function load_produktliste_js_admin($hook){
  *   Functions for Outputting to HTML   *
  ***************************************/
 function show_create_new_or_edit_categories($categories) {
-//    if ( empty($categories) ) {
-//        ?>
-<!--        <div class="form_wrapper_category">-->
-<!--            <h2>Kategorier</h2>-->
-<!--            <form method="POST">-->
-<!--                <input type="hidden" name="new_category" value="true" />-->
-<!--                --><?php //wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
-<!--                <table>-->
-<!--                    <tbody>-->
-<!--                    <tr>-->
-<!--                        <th><label for="new_category"></label>Ny Kategori</th>-->
-<!--                        <td><input name="new_category" type="text" value="--><?php
-//                            if ($post_values['new_category']){
-//                                echo esc_attr( $post_values['new_category'] );
-//                            }?><!--" class="regular-text" />-->
-<!--                        </td>-->
-<!--                    </tr>-->
-<!--                    <tr>-->
-<!--                        <th></th>-->
-<!--                        <td>-->
-<!--                            <p class="submit">-->
-<!--                                <input type="submit" name="new_category_submit" class="button button-primary button-large" value="Lagre ny kategori">-->
-<!--                            </p>-->
-<!--                        </td>-->
-<!--                    </tr>-->
-<!--                    </tbody>-->
-<!--                </table>-->
-<!---->
-<!--            </form>-->
-<!--        </div>-->
-<!--        --><?php
-//    } else {
-//        ?>
-<!--        <div class="form_wrapper_category">-->
-<!--            <h2>Kategorier</h2>-->
-<!--            <form method="POST">-->
-<!--                <input type="hidden" name="new_category" value="true" />-->
-<!--                --><?php //wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
-<!--                <table>-->
-<!--                    <tbody>-->
-<!--                    <tr>-->
-<!--                        <th><label for="new_category"></label>Ny Kategori</th>-->
-<!--                        <td><input name="new_category" type="text" value="--><?php
-//                            if ($post_values['new_category']){
-//                                echo esc_attr( $post_values['new_category'] );
-//                            }?><!--" class="regular-text" />-->
-<!--                        </td>-->
-<!--                    </tr>-->
-<!--                    <tr>-->
-<!--                        <th></th>-->
-<!--                        <td>-->
-<!--                            <p class="submit">-->
-<!--                                <input type="submit" name="new_category" class="button button-primary button-large" value="Lagre ny kategori">-->
-<!--                            </p>-->
-<!--                        </td>-->
-<!--                    </tr>-->
-<!--                    </tbody>-->
-<!--                </table>-->
-<!--            </form>-->
-<!--        </div>-->
-<!--        --><?php
-//    }
+    if ( empty($categories) ) {
+        ?>
+        <div class="form_wrapper_category">
+            <h2>Kategorier</h2>
+            <form method="POST">
+                <input type="hidden" name="new_category" value="true" />
+                <?php wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
+                <table>
+                    <tbody>
+                    <tr>
+                        <th><label for="new_category"></label>Ny Kategori</th>
+                        <td><input name="new_category" type="text" value="<?php
+                            if ($post_values['new_category']){
+                                echo esc_attr( $post_values['new_category'] );
+                            }?>" class="regular-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <td>
+                            <p class="submit">
+                                <input type="submit" name="new_category" class="button button-primary button-large" value="Lagre ny kategori">
+                            </p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </form>
+        </div>
+        <?php
+    } else {
+        ?>
+        <div class="form_wrapper_category">
+            <h2>Kategorier</h2>
+            <form method="POST">
+                <input type="hidden" name="new_category" value="true" />
+                <?php wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
+                <table>
+                    <tbody>
+                    <tr>
+                        <th><label for="new_category"></label>Ny Kategori</th>
+                        <td><input name="new_category" type="text" value="<?php
+                            if ($post_values['new_category']){
+                                echo esc_attr( $post_values['new_category'] );
+                            }?>" class="regular-text" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <td>
+                            <p class="submit">
+                                <input type="submit" name="new_category" class="button button-primary button-large" value="Lagre ny kategori">
+                            </p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <?php
+    }
 }
 
 //function for building the html part for frontend productliste
@@ -317,69 +317,62 @@ function show_produktliste() {
             //loop for each category
             foreach ($categories as $category) {
                 $product_in_category_count = 0;
-                $output;
+                $output = '';
 
-                $output = "";
-                ?>
-                <div class='produktliste_category_wrapper'>
-                    <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
-                    <?php
-                    //loop for processing each product
-                    foreach ($produktliste_results as $product) {
-                        if ($category['category_id'] === $product['category']){
-                            ?>
-                            <div class="accordion">
-                                <div class="accordion-thumbnail-div">
-                                    <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
-                                         alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
-                                         class="accordion-thumbnail"
+                $output = "<div class='produktliste_category_wrapper'>
+                    <h2>" . esc_html( $category['category_name'] ) . "</h2>";
+
+                foreach ($produktliste_results as $product) {
+                    if ($category['category_id'] === $product['category']) {
+                        $product_in_category_count++;
+                        $output .= "
+                            <div class='accordion'>
+                                <div class='accordion-thumbnail-div'>
+                                    <img src='" . wp_get_attachment_url( $product['picture_id'] ) . "'
+                                        alt='" . esc_attr( $product['picture_alt_tag'] ) . "'
+                                         class='accordion-thumbnail'
                                     />
                                 </div>
-                                <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
-                                <div class="accordion-content"><?php echo esc_html( $product['price'] );
+                                <div class='accordion-content'>" . esc_html( $product['product_name'] ) . "</div>
+                                <div class='accordion-content'>" . esc_html( $product['price'] );
                                     if ( $product['price_type'] == 0 ) {
-                                        echo 'kr/kg';
+                                        $output .= "kr/kg";
                                     } elseif ($product['price_type'] == 1) {
-                                        echo 'kr/stk';
+                                        $output .= "kr/stk";
                                     }
-                                    ?></div>
-                                <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
+                                $output .= "</div>
+                                <div class='accordion-content'><i class='fa fa-chevron-down icon-placement' aria-hidden='true'></i></div>
                             </div>
-                            <div class="panel">
-                                <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
-                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
-                                     class="accordion-image"
-                                />
-                                <div class="accordion-list">
+                            <div class='panel'>
+                                <img src='" . wp_get_attachment_url( $product['picture_id'] ) . "'
+                                        alt='" . esc_attr( $product['picture_alt_tag'] ) . "'
+                                         class='accordion-image'
+                                    />
+                                <div class='accordion-list'>
                                     <div><h3>Ingredienser</h3></div>
                                     <div>
-                                        <ul>
-                                            <?php
+                                        <ul>";
                                             //loop for building the ingredients list
                                             foreach ($ingredients as $ingredient) {
                                                 if ($product['id'] === $ingredient['product_id']) {
-                                                    echo '<li>';
                                                     if ( $ingredient['allergen'] == 1 ) {
-                                                        echo '<b>';
-                                                        echo esc_html( $ingredient['ingredient_name'] );
-                                                        echo '</b>';
+                                                        $output .= "<li><b>" . esc_html( $ingredient['ingredient_name'] ) . "</b></li>";
                                                     } else {
-                                                        echo esc_html( $ingredient['ingredient_name'] );
+                                                        $output .= "<li>" . esc_html( $ingredient['ingredient_name'] ) . "</li>";
                                                     }
-                                                    echo '</li>';
                                                 }
                                             }
-                                            ?>
+                                            $output .="
                                         </ul>
                                     </div>
                                 </div>
                             </div>
-                            <?php
-                        }
+                        ";
                     }
-                    ?>
-                </div>
-                <?php
+                    if ($product_in_category_count > 0) {
+                        echo $output;
+                    }
+                }
             }
             ?>
         </div>
@@ -404,88 +397,91 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
             <?php
             //loop for each category
             foreach ($categories as $category) {
-                ?>
-                <div class='produktliste_category_wrapper'>
-                    <h2><?php echo esc_html( $category['category_name'] ) ?></h2>
-                    <?php
-                    //loop for processing each product
-                    foreach ($produktliste_results as $product) {
-                        if ($category['category_id'] === $product['category']){
-                            ?>
-                            <div class="accordion">
-                                <div class="accordion-thumbnail-div">
-                                    <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
-                                         alt="<?php echo esc_attr( $product['picture_alt_tag'] ); ?>"
-                                         class="accordion-thumbnail"
-                                    />
-                                </div>
-                                <div class="accordion-content"><?php echo esc_html( $product['product_name'] ); ?></div>
-                                <div class="accordion-content"><?php echo esc_html( $product['price'] );
-                                    if ( $product['price_type'] == 0 ) {
-                                        echo 'kr/kg';
-                                    } elseif ($product['price_type'] == 1) {
-                                        echo 'kr/stk';
-                                    }
-                                    ?></div>
-                                <div class="accordion-content"><i class="fa fa-chevron-down icon-placement" aria-hidden="true"></i></div>
-                            </div>
-                            <div class="panel">
-                                <img src="<?php echo wp_get_attachment_url( $product['picture_id'] ); ?>"
-                                     alt="<?php echo esc_attr( $product['picture_alt_tag'] ) ?>"
-                                     class="accordion-image"
-                                />
-                                <div class="accordion-list">
-                                    <div><h3>Ingredienser</h3></div>
-                                    <div>
-                                        <ul>
-                                            <?php
-                                            //loop for building the ingredients list
-                                            foreach ($ingredients as $ingredient) {
-                                                if ($product['id'] === $ingredient['product_id']) {
-                                                    echo '<li>';
-                                                    if ( $ingredient['allergen'] == 1 ) {
-                                                        echo '<b>';
-                                                        echo esc_html( $ingredient['ingredient_name'] );
-                                                        echo '</b>';
-                                                    } else {
-                                                        echo esc_html( $ingredient['ingredient_name'] );
-                                                    }
-                                                    echo '</li>';
-                                                }
-                                            }
-                                            ?>
-                                        </ul>
+                $product_in_category_count = 0;
+                $output = '';
+
+                $output = "<div class='produktliste_category_wrapper'>
+                        <h2>" . esc_html( $category['category_name'] ) . "</h2>";
+
+                $output2 = "<div class='produktliste_category_wrapper'>
+                        <h2>" . esc_html( $category['category_name'] ) . "</h2>
+                        <p>Er laget, men har ingen produkter.</p>";
+
+                foreach ($produktliste_results as $product) {
+                    if ($category['category_id'] === $product['category']) {
+                        $product_in_category_count++;
+                        $output .= "
+                                <div class='accordion'>
+                                    <div class='accordion-thumbnail-div'>
+                                        <img src='" . wp_get_attachment_url( $product['picture_id'] ) . "'
+                                            alt='" . esc_attr( $product['picture_alt_tag'] ) . "'
+                                             class='accordion-thumbnail'
+                                        />
                                     </div>
-                                    <div class="buttons_wrapper">
-                                        <div>
-                                            <form method="POST">
-                                                <input type="hidden" name="edit_product" value="true" />
-                                                <?php wp_nonce_field( 'produktliste_product_edit_update', 'produktliste_product_edit_form' ); ?>
-                                                <p class="submit">
-                                                    <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
-                                                    <input type="submit" name="edit_product_submit" class="button button-primary" value="Endre">
-                                                </p>
-                                            </form>
-                                        </div>
-                                        <div>
-                                            <form method="POST">
-                                                <input type="hidden" name="delete_product" value="true" />
-                                                <?php wp_nonce_field( 'produktliste_product_delete_update', 'produktliste_product_delete_form' ); ?>
-                                                <p class="submit">
-                                                    <input type="hidden" name="product_id" value="<?php echo esc_html( $product['id'] ); ?>" />
-                                                    <input type="submit" name="delete_product_submit" class="button button-warning" value="Slett">
-                                                </p>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php
+                                    <div class='accordion-content'>" . esc_html( $product['product_name'] ) . "</div>
+                                    <div class='accordion-content'>" . esc_html( $product['price'] );
+                        if ( $product['price_type'] == 0 ) {
+                            $output .= "kr/kg";
+                        } elseif ($product['price_type'] == 1) {
+                            $output .= "kr/stk";
                         }
+                        $output .= "</div>
+                                    <div class='accordion-content'><i class='fa fa-chevron-down icon-placement' aria-hidden='true'></i></div>
+                                </div>
+                                <div class='panel'>
+                                    <img src='" . wp_get_attachment_url( $product['picture_id'] ) . "'
+                                            alt='" . esc_attr( $product['picture_alt_tag'] ) . "'
+                                             class='accordion-image'
+                                        />
+                                    <div class='accordion-list'>
+                                        <div><h3>Ingredienser</h3></div>
+                                        <div>
+                                            <ul>";
+                        //loop for building the ingredients list
+                        foreach ($ingredients as $ingredient) {
+                            if ($product['id'] === $ingredient['product_id']) {
+                                if ( $ingredient['allergen'] == 1 ) {
+                                    $output .= "<li><b>" . esc_html( $ingredient['ingredient_name'] ) . "</b></li>";
+                                } else {
+                                    $output .= "<li>" . esc_html( $ingredient['ingredient_name'] ) . "</li>";
+                                }
+                            }
+                        }
+                        $output .="
+                                            </ul>
+                                        </div>
+                                        <div class='buttons_wrapper'>
+                                            <div>
+                                                <form method='POST'>
+                                                    <input type='hidden' name='edit_product' value='true' />" .
+                                                    wp_nonce_field( 'produktliste_product_edit_update', 'produktliste_product_edit_form' ) . "
+                                                    <p class='submit'>
+                                                        <input type='hidden' name='product_id' value='" . esc_html( $product['id'] ) . "' />
+                                                        <input type='submit' name='edit_product_submit' class='button button-primary' value='Endre'>
+                                                    </p>
+                                                </form>
+                                            </div>
+                                            <div>
+                                                <form method='POST'>
+                                                    <input type='hidden' name='delete_product' value='true' />" .
+                                                    wp_nonce_field( 'produktliste_product_delete_update', 'produktliste_product_delete_form' ) . "
+                                                    <p class='submit'>
+                                                        <input type='hidden' name='product_id' value='" . esc_html( $product['id'] ). "' />
+                                                        <input type='submit' name='delete_product_submit' class='button button-warning' value='Slett'>
+                                                    </p>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ";
                     }
-                    ?>
-                </div>
-                <?php
+                    if ($product_in_category_count > 0) {
+                        echo $output;
+                    } else {
+                        echo $output2;
+                    }
+                }
             }
             ?>
         </div>
@@ -1088,15 +1084,15 @@ function produktliste_setup_menu() {
             produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values);
         }
 
-        //Checking for 'delete_product' to process the form on POST
-        if( $_POST[''] === 'true' ){
-            produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
-        }
-
-        //Checking for 'delete_product' to process the form on POST
-        if( $_POST[''] === 'true' ){
-            produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
-        }
+//        //Checking for 'delete_product' to process the form on POST
+//        if( $_POST[''] === 'true' ){
+//            produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
+//        }
+//
+//        //Checking for 'delete_product' to process the form on POST
+//        if( $_POST[''] === 'true' ){
+//            produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
+//        }
 
         //declaring variables and querying db for needed information
         $categories;
