@@ -112,3 +112,6 @@ img.accordion-image {
     width: 80%;
   }
 }
+.produktliste_existing_image {
+    max-height: 30em;
+}
