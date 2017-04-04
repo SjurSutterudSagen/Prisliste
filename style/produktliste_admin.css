@@ -8,6 +8,25 @@
 
  }
 
+.float-right {
+  float: right;
+}
+.ingredients-div-container {
+  max-width: 600px;
+}
+.allergen-checkbox-div {
+  max-width: 25px;
+}
+
+.allergen-titel {
+  visibility: hidden;
+}
+
+.allergen-titel-mobile {
+
+}
+
+
 div.accordion {
   background-color: #eee;
   color: #444;
@@ -81,6 +100,15 @@ img.accordion-image {
 }
 
 @media screen and (min-width: 480px) {
+  .allergen-titel {
+    visibility: visible;
+  }
+
+  .allergen-titel-mobile {
+    display: none;
+    visibility: hidden;
+  }
+
   div.accordion-content {
     width: 38%;
   }

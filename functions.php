@@ -692,12 +692,13 @@ function show_adminpage_product_forms($categories, $post_values) {
                         </tr>
                         </tbody>
                     </table>
+                    <div class="ingredients-div-container">
                     <table class="form-table">
                         <tbody>
                         <tr>
                             <th><h3>Ingredienser</h3></th>
                             <td></td>
-                            <td><p>Allergen?</p></td>
+                            <td><p class="float-right allergen-titel">Allergen?</p></td>
                         </tr>
                         <?php
                         //if no ingredients were added for a new product
@@ -716,11 +717,12 @@ function show_adminpage_product_forms($categories, $post_values) {
                                         if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
                                             echo '<p>' . $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] . '</p>';
                                         }
+
                                     echo "</td>";
                                     if ( $post_values['ingredient'][$i]['allergen'] === 1) {
-                                        echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
+                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></div></td>";
                                     } else {
-                                        echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
+                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></div></td>";
                                     }
                                     if ($post_values['ingredient'][$i]['ingredient_id']) {
 
@@ -736,6 +738,7 @@ function show_adminpage_product_forms($categories, $post_values) {
                         </tr>
                         </tbody>
                     </table>
+                  </div>
                     <p class="submit">
                         <input type="submit" name="submit" class="button button-primary button-large" value="Lagre Produkt">
                     </p>
