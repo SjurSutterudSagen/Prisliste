@@ -1145,17 +1145,6 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
           SELECT m.id, m.category, c.category_name, m.product_name, m.price, m.price_type, m.picture_id, m.picture_alt_tag
           FROM {$table_name_main} m, {$table_name_product_category} c
           WHERE m.category = c.category_id
-          AND ID = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
-
-        //querying db for data on the products ingredients
-        $produkt_ingredients = $wpdb->get_results( $wpdb->prepare( "
-          SELECT i.id, i.ingredient_name, i.allergen
-          FROM {$table_name_main} m, {$table_name_product_ingredients} i
-          WHERE m.id = i.product_id
-          AND m.id = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
-          SELECT m.id, m.category, c.category_name, m.product_name, m.price, m.price_type, m.picture_id, m.picture_alt_tag
-          FROM {$table_name_main} m, {$table_name_product_category} c
-          WHERE m.category = c.category_id
           AND ID = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
         //querying db for data on the products ingredients
