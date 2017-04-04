@@ -648,23 +648,6 @@ function show_adminpage_product_forms($categories, $post_values) {
                             </td>
                         </tr>
                         <tr>
-                            <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
-                            <td><input name="alt_txt" type="text" value="<?php
-                                if ($post_values['alt_txt']){
-                                    echo esc_attr( $post_values['alt_txt'] );
-                                }?>" class="regular-text" />
-                                <?php
-                                //if there is a product name error message
-                                if (count($post_values['validation_errors']['alt_txt'])) {
-                                    echo '<p>';
-                                    echo $post_values['validation_errors']['alt_txt'];
-                                    echo '</p>';
-                                }
-                                ?>
-                            </td>
-
-                        </tr>
-                        <tr>
                             <th><label for="product_image">Last opp bilde</label></th>
                             <td>
                                 <input type="file" name="product_image">
@@ -689,6 +672,23 @@ function show_adminpage_product_forms($categories, $post_values) {
                                 <?php
                             }
                             ?>
+                        </tr>
+                        <tr>
+                            <th><label for="alt_txt">Kort og beskrivende tekst av selve bildet.</label></th>
+                            <td><input name="alt_txt" type="text" value="<?php
+                                if ($post_values['alt_txt']){
+                                    echo esc_attr( $post_values['alt_txt'] );
+                                }?>" class="regular-text" />
+                                <?php
+                                //if there is a product name error message
+                                if (count($post_values['validation_errors']['alt_txt'])) {
+                                    echo '<p>';
+                                    echo $post_values['validation_errors']['alt_txt'];
+                                    echo '</p>';
+                                }
+                                ?>
+                            </td>
+
                         </tr>
                         </tbody>
                     </table>
