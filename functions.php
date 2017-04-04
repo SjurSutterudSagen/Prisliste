@@ -648,23 +648,6 @@ function show_adminpage_product_forms($categories, $post_values) {
                             </td>
                         </tr>
                         <tr>
-                            <th><label for="alt_txt">Alt-tekst: Kort og beskrivende tekst av selve bildet.</label></th>
-                            <td><input name="alt_txt" type="text" value="<?php
-                                if ($post_values['alt_txt']){
-                                    echo esc_attr( $post_values['alt_txt'] );
-                                }?>" class="regular-text" />
-                                <?php
-                                //if there is a product name error message
-                                if (count($post_values['validation_errors']['alt_txt'])) {
-                                    echo '<p>';
-                                    echo $post_values['validation_errors']['alt_txt'];
-                                    echo '</p>';
-                                }
-                                ?>
-                            </td>
-
-                        </tr>
-                        <tr>
                             <th><label for="product_image">Last opp bilde</label></th>
                             <td>
                                 <input type="file" name="product_image">
@@ -690,14 +673,32 @@ function show_adminpage_product_forms($categories, $post_values) {
                             }
                             ?>
                         </tr>
+                        <tr>
+                            <th><label for="alt_txt">Kort og beskrivende tekst av selve bildet.</label></th>
+                            <td><input name="alt_txt" type="text" value="<?php
+                                if ($post_values['alt_txt']){
+                                    echo esc_attr( $post_values['alt_txt'] );
+                                }?>" class="regular-text" />
+                                <?php
+                                //if there is a product name error message
+                                if (count($post_values['validation_errors']['alt_txt'])) {
+                                    echo '<p>';
+                                    echo $post_values['validation_errors']['alt_txt'];
+                                    echo '</p>';
+                                }
+                                ?>
+                            </td>
+
+                        </tr>
                         </tbody>
                     </table>
+                    <div class="ingredients-div-container">
                     <table class="form-table">
                         <tbody>
                         <tr>
                             <th><h3>Ingredienser</h3></th>
                             <td></td>
-                            <td><p>Allergen?</p></td>
+                            <td><p class="float-right allergen-titel">Allergen?</p></td>
                         </tr>
                         <?php
                         //if no ingredients were added for a new product
@@ -709,18 +710,19 @@ function show_adminpage_product_forms($categories, $post_values) {
                         //loop for ingredients
                         if ( count($post_values['ingredient']) !== 0) {
                             for ($i = 0; $i < count($post_values['ingredient']); $i++) {
-                                echo "<tr> 
+                                echo "<tr>
                                     <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
                                     <td>
                                         <input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' />";
                                         if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
                                             echo '<p>' . $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] . '</p>';
                                         }
+
                                     echo "</td>";
                                     if ( $post_values['ingredient'][$i]['allergen'] === 1) {
-                                        echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></td>";
+                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></div></td>";
                                     } else {
-                                        echo "<td><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></td>";
+                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></div></td>";
                                     }
                                     if ($post_values['ingredient'][$i]['ingredient_id']) {
 
@@ -736,6 +738,7 @@ function show_adminpage_product_forms($categories, $post_values) {
                         </tr>
                         </tbody>
                     </table>
+                  </div>
                     <p class="submit">
                         <input type="submit" name="submit" class="button button-primary button-large" value="Lagre Produkt">
                     </p>
@@ -1142,16 +1145,16 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         //querying db for data on the product
         $product_id = absint($_POST['product_id']);
         $product = $wpdb->get_row( $wpdb->prepare( "
-          SELECT m.id, m.category, c.category_name, m.product_name, m.price, m.price_type, m.picture_id, m.picture_alt_tag 
-          FROM {$table_name_main} m, {$table_name_product_category} c 
-          WHERE m.category = c.category_id 
+          SELECT m.id, m.category, c.category_name, m.product_name, m.price, m.price_type, m.picture_id, m.picture_alt_tag
+          FROM {$table_name_main} m, {$table_name_product_category} c
+          WHERE m.category = c.category_id
           AND ID = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
         //querying db for data on the products ingredients
         $produkt_ingredients = $wpdb->get_results( $wpdb->prepare( "
-          SELECT i.id, i.ingredient_name, i.allergen 
-          FROM {$table_name_main} m, {$table_name_product_ingredients} i 
-          WHERE m.id = i.product_id 
+          SELECT i.id, i.ingredient_name, i.allergen
+          FROM {$table_name_main} m, {$table_name_product_ingredients} i
+          WHERE m.id = i.product_id
           AND m.id = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
         //updating $post_values with correct values
@@ -1404,11 +1407,11 @@ function validate_image($img) {
 }
 
 function validate_ingredient($ingredient_name) {
-    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9(),\&\% ]/";
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9(),\&\%\- ]/";
     if ( $ingredient_name === "") {
         return '<p>Ingrediensnavnet mangler.</p>';
     } elseif ( preg_match($preg_pattern, $ingredient_name) ) {
-        return '<p>Bare store og små bokstaver, tall, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
+        return '<p>Bare store og små bokstaver, tall, bindestrek, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
     } elseif ( (strlen($ingredient_name) < 3) || (strlen($ingredient_name) > 200) ) {
         return '<p>Ingrediensnavnet må være mellom 3 og 200 bokstaver.</p>';
     }
