@@ -26,6 +26,11 @@
 
 }
 
+.ingredient-delete-button {
+  background: red;
+}
+
+
 
 div.accordion {
   background-color: #eee;
@@ -108,6 +113,7 @@ img.accordion-image {
     display: none;
     visibility: hidden;
   }
+
 
   div.accordion-content {
     width: 38%;
