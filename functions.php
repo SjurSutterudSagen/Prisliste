@@ -222,10 +222,10 @@ function show_create_new_or_edit_categories($categories) {
                 <table>
                     <tbody>
                     <tr>
-                        <th><label for="new_category"></label>Ny Kategori</th>
-                        <td><input name="new_category" type="text" value="<?php
-                            if ($post_values['new_category']){
-                                echo esc_attr( $post_values['new_category'] );
+                        <th><label for="category_input"></label>Ny Kategori</th>
+                        <td><input name="category_input" type="text" value="<?php
+                            if ($post_values['category_input']){
+                                echo esc_attr( $post_values['category_input'] );
                             }?>" class="regular-text" />
                         </td>
                     </tr>
@@ -253,10 +253,10 @@ function show_create_new_or_edit_categories($categories) {
                 <table class="form-table">
                     <tbody>
                     <tr>
-                        <th><label for="new_category_input"></label>Ny Kategori</th>
-                        <td><input name="new_category_input" type="text" value="<?php
-                            if ($post_values['new_category']){
-                                echo esc_attr( $post_values['new_category'] );
+                        <th><label for="category_input"></label>Ny Kategori</th>
+                        <td><input name="category_input" type="text" value="<?php
+                            if ($post_values['category']){
+                                echo esc_attr( $post_values['category'] );
                             }?>" class="regular-text" />
                         </td>
                     </tr>
@@ -769,7 +769,7 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
         <?php
     }
 }
-//processing POST to the plugin page from the category form (edit category)
+//processing POST to the plugin page from the category form (edit/delete category)
 function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_product_category, $post_values) {
     if(
         ! isset( $_POST['produktliste_edit_or_delete_category_form'] ) ||
@@ -782,8 +782,8 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_pro
         exit;
     } else {
         // Processing the POST
-        $post_values['category'] = absint($_POST['category']);
 
+        $post_values['category'] = absint($_POST['category']);
         $post_values['editing_status'] = TRUE;
         return $post_values;
     }
@@ -964,12 +964,12 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                         //delete old picture
                         wp_delete_attachment( $old_image_id['picture_id'] );
                     }
-                    ?>
-                    <div class="updated">
-                        <p>Produkt lagret.</p>
-                    </div>
-                    <?php
                 }
+                ?>
+                <div class="updated">
+                    <p>Produkt lagret.</p>
+                </div>
+                <?php
             }
         } else {
             //existing product with no new image
@@ -1105,10 +1105,6 @@ function produktliste_setup_menu() {
     function produktliste_init() {
         $post_values;
 
-        echo '<pre>';
-        var_dump($_POST);
-        echo '</pre>';
-
         //declaring db variables
         global $wpdb;
         $table_name_main = $wpdb->prefix . "produktliste_produkter";
@@ -1132,7 +1128,6 @@ function produktliste_setup_menu() {
 
         //Checking for 'new_category' to process the form on POST
         if( $_POST['new_category'] === 'true' ){
-            echo 'yes';
             produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values);
         }
 
