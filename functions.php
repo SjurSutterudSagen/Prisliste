@@ -1186,12 +1186,57 @@ function produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $
         exit;
     } else {
         // Handle our form data
+        $product_id = absint($_POST['product_id']);
 
-        //outputting the success message
-        ?>
-        <div class="updated">
-            <p>Delete Button Clicked for Product with ID: <?php echo esc_html( $_POST['product_id'] ); ?>.</p>
-        </div> <?php
+        if ( $product_id !== 0 ) {
+            //deleting the correct product
+
+            //query db for product image id
+            $product_image = $wpdb->get_row( $wpdb->prepare( "
+                SELECT picture_id
+                FROM {$table_name_main}
+                WHERE ID = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+
+            //querying db for data on the products ingredients
+            $product_ingredients = $wpdb->get_results( $wpdb->prepare( "
+                SELECT i.id
+                FROM {$table_name_main} m, {$table_name_product_ingredients} i
+                WHERE m.id = i.product_id
+                AND m.id = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+
+            //deleting the image
+            wp_delete_attachment( $product_image['picture_id'] );
+
+            //deleting the ingredients
+            foreach ($product_ingredients AS $ingredient) {
+                $wpdb->delete( $table_name_product_ingredients, array(
+                    'ID' => $ingredient['id']
+                ), array( '%d' ) )
+                or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+            }
+
+            //deleting the product
+            $wpdb->delete( $table_name_main, array(
+                'ID' => $product_id
+            ), array( '%d' ) )
+            or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+
+            //outputting the success message
+            ?>
+            <div class="updated">
+                <p>Product slettet.</p>
+            </div>
+            <?php
+        } else {
+            //outputting error message
+            ?>
+            <div class="error">
+                <p>Det har skjedd en feil. Vennligst prøv igjen..</p>
+            </div>
+            <?php
+
+        }
+
 
     }
 }
