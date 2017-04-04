@@ -211,7 +211,7 @@ function load_produktliste_js_admin($hook){
  *   Functions for Outputting to HTML   *
  ***************************************/
 //function for building the html part for category inputs on the admin page for the plugin
-function show_create_new_or_edit_categories($categories) {
+function show_create_new_or_edit_categories($categories, $post_values_cat) {
     if ( empty($categories) ) {
         ?>
         <div class="form_wrapper_category">
@@ -222,10 +222,10 @@ function show_create_new_or_edit_categories($categories) {
                 <table>
                     <tbody>
                     <tr>
-                        <th><label for="new_category"></label>Ny Kategori</th>
-                        <td><input name="new_category" type="text" value="<?php
-                            if ($post_values['new_category']){
-                                echo esc_attr( $post_values['new_category'] );
+                        <th><label for="category_input"></label>Ny Kategori</th>
+                        <td><input name="category_input" type="text" value="<?php
+                            if ($post_values_cat['category_input']){
+                                echo esc_attr( $post_values_cat['category_input'] );
                             }?>" class="regular-text" />
                         </td>
                     </tr>
@@ -233,7 +233,7 @@ function show_create_new_or_edit_categories($categories) {
                         <th></th>
                         <td>
                             <p class="submit">
-                                <input type="submit" name="new_category" class="button button-primary button-large" value="Lagre ny kategori">
+                                <input type="submit" name="new_category_submit" class="button button-primary button-large" value="Lagre ny kategori">
                             </p>
                         </td>
                     </tr>
@@ -249,22 +249,45 @@ function show_create_new_or_edit_categories($categories) {
             <h2>Kategorier</h2>
             <form method="POST">
                 <input type="hidden" name="new_category" value="true" />
-                <?php wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' ); ?>
+                <?php
+                wp_nonce_field( 'produktliste_new_category_update', 'produktliste_new_category_form' );
+                if ($post_values_cat['category']) {
+                    echo '<input type="hidden" name="cat_id" value="'. esc_attr( $post_values_cat['category'] ) .'" />';
+                } else {
+                    echo '<input type="hidden" name="cat_id" value="" />';
+                }
+                ?>
                 <table class="form-table">
                     <tbody>
-                    <tr>
-                        <th><label for="new_category_input"></label>Ny Kategori</th>
-                        <td><input name="new_category_input" type="text" value="<?php
-                            if ($post_values['new_category']){
-                                echo esc_attr( $post_values['new_category'] );
+                    <tr><?php
+                        if ($post_values_cat['editing_status'] === TRUE) {
+                            ?>
+                            <th><label for="category_input"></label>Endre Kategori</th>
+                            <input type="hidden" name="editing_status" value="true" />
+                            <?php
+                        } else {
+                            ?>
+                            <th><label for="category_input"></label>Ny Kategori</th>
+                            <input type="hidden" name="editing_status" value="false" />
+                            <?php
+                        }
+                        ?>
+                        <td><input name="category_input" type="text" value="<?php
+                            if ($post_values_cat['category']){
+                                echo esc_attr( $post_values_cat['category_name'] );
                             }?>" class="regular-text" />
+                            <?php
+                            if ( $post_values_cat['errormessage'] !== 0 ) {
+                                echo '<p>' . $post_values_cat['errormessage'] . '</p>';
+                            }
+                            ?>
                         </td>
                     </tr>
                     <tr>
                         <th></th>
                         <td>
                             <p class="submit">
-                                <input type="submit" name="new_category_submit" class="button button-primary button-large" value="Lagre ny kategori">
+                                <input type="submit" name="new_category_submit" class="button button-primary button-large" value="Lagre kategori">
                             </p>
                         </td>
                     </tr>
@@ -275,11 +298,6 @@ function show_create_new_or_edit_categories($categories) {
                 <input type="hidden" name="edit_or_delete_category" value="true" />
                 <?php
                 wp_nonce_field( 'produktliste_edit_or_delete_category_update', 'produktliste_edit_or_delete_category_form' );
-                if ($post_values['editing_status'] === TRUE) {
-                    echo '<input type="hidden" name="editing_status" value="true" />';
-                } else {
-                    echo '<input type="hidden" name="editing_status" value="false" />';
-                }
                 ?>
                 <table class="form-table">
                     <tbody>
@@ -289,7 +307,7 @@ function show_create_new_or_edit_categories($categories) {
                             <select name="edit_or_delete_category_select" type="text" value="" class="regular-text">
                                 <?php
                                 foreach ($categories as $category) {
-                                    if ($post_values['category'] === $category['category_id']) {
+                                    if ($post_values_cat['category'] === $category['category_id']) {
                                         echo "<option value='" . esc_attr( $category['category_id'] ) . "' selected='selected'>" . esc_html( $category['category_name'] ) . "</option>";
                                     } else {
                                         echo "<option value='" . esc_attr( $category['category_id'] ) . "'>" . esc_html( $category['category_name'] ) . "</option>";
@@ -303,7 +321,7 @@ function show_create_new_or_edit_categories($categories) {
                         <th></th>
                         <td>
                             <p class="submit">
-                                <input type="submit" name="edit_or_delete_category_submit" class="button button-primary" value="Endre kategori">
+                                <input type="submit" name="edit_category_submit" class="button button-primary" value="Endre kategori">
                             </p>
                             <p class="submit">
                                 <input type="submit" name="delete_category_submit" class="button button-warning" value="Slett kategori">
@@ -534,16 +552,7 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
 }
 
 function show_adminpage_product_forms($categories, $post_values) {
-    ?>
-    <div>
-        <div>
-            <h1>Administrator side for Produktliste plugin</h1>
-        </div>
-        <?php
-
-        show_create_new_or_edit_categories($categories);
-
-        if (!empty($categories)) {
+    if (!empty($categories)) {
             ?>
             <div class="form_wrapper_product">
                 <?php
@@ -556,7 +565,7 @@ function show_adminpage_product_forms($categories, $post_values) {
                 <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="main_form_updated" value="true" />
                     <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
-                    if ($post_values['editing_status'] === TRUE) {
+                    if ( $post_values['editing_status'] === TRUE ) {
                         echo '<input type="hidden" name="editing_status" value="true" />';
                     } else {
                         echo '<input type="hidden" name="editing_status" value="false" />';
@@ -739,16 +748,13 @@ function show_adminpage_product_forms($categories, $post_values) {
             </div>
             <?php
         }
-        ?>
-    </div>
-    <?php
 }
 
 /**********************************************************
  *   Functions for building and processing the adminpage  *
  *********************************************************/
 //processing POST to the plugin page from the category form (new category)
-function produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values) {
+function produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values_cat) {
     if(
         ! isset( $_POST['produktliste_new_category_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_new_category_form'], 'produktliste_new_category_update' )
@@ -760,17 +766,55 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
         exit;
     } else {
         // Processing the POST
+        $editing_status = sanitize_text_field($_POST['editing_status']);
+        if (strtolower($editing_status) === 'true') {
+            $post_values_cat['editing_status'] = TRUE;
+        }
+
+        //sanetizing and storing the $_POST values
+        $post_values_cat['category'] = absint($_POST['cat_id']);
+        $post_values_cat['category_name'] = sanitize_text_field($_POST['category_input']);
+
+        //validate postdata
+        $post_values_cat['errormessage'] = validate_category_name( $post_values_cat['category_name'] );
+        if ( count($post_values_cat['errormessage']) !== 0  ) {
+            ?>
+            <div class="error">
+                <p>Vennligst fiks feilen!</p>
+            </div>
+            <?php
+            return $post_values_cat;
+        } else {
+            //new product
+            if (!$post_values_cat['editing_status'] === TRUE) {
+                //saving new category
+                $wpdb->insert( $table_name_product_category, array(
+                    'category_name' => $post_values_cat['category_name']
+                    ), array( '%s')
+                );
+
+            } else {
+                //saving edit category
+                $wpdb->update( $table_name_product_category,
+                    array(
+                        'category_name' => $post_values_cat['category_name']
+                    ),  array('category_id' => $post_values_cat['category']),
+                    array( '%s' ),
+                    array( '%d' )
+                );
+            }
+        }
 
         //outputting the success message
         ?>
         <div class="updated">
-            <p>Lagret ny kategori.</p>
+            <p>Lagret kategori.</p>
         </div>
         <?php
     }
 }
-//processing POST to the plugin page from the category form (edit category)
-function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_product_category, $post_values) {
+//processing POST to the plugin page from the category form (edit/delete category)
+function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_main, $table_name_product_category, $post_values_cat) {
     if(
         ! isset( $_POST['produktliste_edit_or_delete_category_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_edit_or_delete_category_form'], 'produktliste_edit_or_delete_category_update' )
@@ -782,10 +826,63 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_pro
         exit;
     } else {
         // Processing the POST
-        $post_values['category'] = absint($_POST['category']);
+        if ( $_POST['edit_category_submit'] ) { //editing a category
 
-        $post_values['editing_status'] = TRUE;
-        return $post_values;
+            $cat_id = absint($_POST['edit_or_delete_category_select']);
+            $cat = $wpdb->get_row( $wpdb->prepare( "
+                SELECT category_id, category_name
+                FROM {$table_name_product_category}
+                WHERE category_id = %d", $cat_id), ARRAY_A) or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+
+            $post_values_cat['category'] = $cat_id;
+            $post_values_cat['category_name'] = $cat['category_name'];
+
+            $post_values_cat['editing_status'] = TRUE;
+            return $post_values_cat;
+
+        } elseif ( $_POST['delete_category_submit'] ) { //deleting a category
+            //TODO: add delete category button
+            $cat_id = absint($_POST['edit_or_delete_category_select']);
+            $cat = $wpdb->get_row( $wpdb->prepare( "
+                SELECT category
+                FROM {$table_name_main}
+                WHERE category = %d", $cat_id), ARRAY_A);
+
+            if ( empty($cat) ) {
+                //no products in the category, safe to delete
+                $wpdb->delete( $table_name_product_category, array(
+                        'category_id' => $cat_id
+                    ), array( '%d' ) )
+                    or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+
+                ?>
+                <div class="updated">
+                    <p>Kategori slettet.</p>
+                </div>
+                <?php
+
+            } else {
+                //products in the category, not safe to delete
+                ?>
+                <div class="error">
+                    <p>Det er produkter i denne kategorien, og kategorier kan bare slettes hvis de ikke inneholder produkter.</p>
+                </div>
+                <?php
+                return $post_values_cat;
+            }
+
+
+
+        } else {
+            ?>
+            <div class="error">
+                <p>Det har skjedd en feil. Vennligst prøv igjen.</p>
+            </div>
+            <?php
+            }
+
+
+
     }
 }
 
@@ -926,7 +1023,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     $old_image_id = $wpdb->get_row( $wpdb->prepare( "
                     SELECT picture_id
                     FROM {$table_name_main}
-                    WHERE ID = %d", $post_values['product_id']), ARRAY_A)or die ( $wpdb->last_error );
+                    WHERE ID = %d", $post_values['product_id']), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
                     $wpdb->update( $table_name_main,
                             array(
@@ -964,12 +1061,12 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                         //delete old picture
                         wp_delete_attachment( $old_image_id['picture_id'] );
                     }
-                    ?>
-                    <div class="updated">
-                        <p>Produkt lagret.</p>
-                    </div>
-                    <?php
                 }
+                ?>
+                <div class="updated">
+                    <p>Produkt lagret.</p>
+                </div>
+                <?php
             }
         } else {
             //existing product with no new image
@@ -1048,14 +1145,14 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
           SELECT m.id, m.category, c.category_name, m.product_name, m.price, m.price_type, m.picture_id, m.picture_alt_tag 
           FROM {$table_name_main} m, {$table_name_product_category} c 
           WHERE m.category = c.category_id 
-          AND ID = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
+          AND ID = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
         //querying db for data on the products ingredients
         $produkt_ingredients = $wpdb->get_results( $wpdb->prepare( "
           SELECT i.id, i.ingredient_name, i.allergen 
           FROM {$table_name_main} m, {$table_name_product_ingredients} i 
           WHERE m.id = i.product_id 
-          AND m.id = %d", $product_id), ARRAY_A)or die ( $wpdb->last_error );
+          AND m.id = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
         //updating $post_values with correct values
         $post_values['product_id'] = $product['id'];
@@ -1104,10 +1201,7 @@ function produktliste_setup_menu() {
     //the code that creates the admin page of the plugin
     function produktliste_init() {
         $post_values;
-
-        echo '<pre>';
-        var_dump($_POST);
-        echo '</pre>';
+        $post_values_cat;
 
         //declaring db variables
         global $wpdb;
@@ -1132,13 +1226,12 @@ function produktliste_setup_menu() {
 
         //Checking for 'new_category' to process the form on POST
         if( $_POST['new_category'] === 'true' ){
-            echo 'yes';
-            produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values);
+            $post_values_cat = produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values_cat);
         }
 
         //Checking for 'edit_or_delete_category' to process the form on POST
         if( $_POST['edit_or_delete_category'] === 'true' ){
-            produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_product_category, $post_values);
+            $post_values_cat = produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_main, $table_name_product_category, $post_values_cat);
         }
 
         //declaring variables and querying db for needed information
@@ -1161,8 +1254,20 @@ function produktliste_setup_menu() {
             FROM    {$table_name_product_ingredients}
         ", ARRAY_A);
 
-        show_adminpage_product_forms($categories, $post_values);
-        show_produktliste_admin($categories, $produktliste_results, $ingredients);
+
+        ?>
+        <div>
+            <div>
+                <h1>Administrator side for Produktliste plugin</h1>
+            </div>
+            <?php
+            show_create_new_or_edit_categories($categories, $post_values_cat);
+            show_adminpage_product_forms($categories, $post_values);
+            show_produktliste_admin($categories, $produktliste_results, $ingredients);
+            ?>
+        </div>
+        <?php
+
     }
 
     add_menu_page(
@@ -1178,6 +1283,17 @@ function produktliste_setup_menu() {
 /******************************************
  *   Functions for validating the inputs  *
  *****************************************/
+function validate_category_name($categoryname) {
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ ]/";
+    if ( $categoryname === "") {
+        return '<p>Kategorinavn mangler.</p>';
+    } elseif ( preg_match($preg_pattern, $categoryname) ) {
+        return '<p>Bare store og små bokstaver og mellomrom er tillatt i kategorinavnet.</p>';
+    } elseif ( (strlen($categoryname) < 3) || (strlen($categoryname) > 25) ) {
+        return '<p>Produktnavn må være mellom 3 og 25 bokstaver.</p>';
+    }
+}
+
 function validate_product_name($productname) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\% ]/";
     if ( $productname === "") {
