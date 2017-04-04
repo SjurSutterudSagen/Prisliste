@@ -35,7 +35,7 @@ div.accordion-content {
 }
 
 .accordion-thumbnail {
-  width: 74px;
+  width: 82%;
   height: auto;
   margin: -18px;
 }
@@ -46,7 +46,7 @@ div.accordion-content {
 
 i.icon-placement {
   float: right;
-  margin-right: 15px;
+  padding-right: 30px;
 }
 
 
@@ -79,11 +79,15 @@ img.accordion-image {
 
 @media screen and (min-width: 480px) {
   div.accordion-content {
-    width: 30%;
+    width: 38%;
+  }
+
+  div.accordion-content:last-child {
+    width: 10%;
   }
 
   .accordion-thumbnail-div {
-    width: 10%;
+    width: 12%;
     float: left;
     margin: 0;
     padding: 0;
