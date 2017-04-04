@@ -71,3 +71,6 @@ img.accordion-image {
 h3 {
     margin-top: 0;
 }
+.produktliste_existing_image {
+    max-height: 30em;
+}
