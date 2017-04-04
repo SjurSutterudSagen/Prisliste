@@ -17,9 +17,7 @@ global $wpdb;
 $table_name_main = $wpdb->prefix . "prisliste_produkter";
 $table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
 $table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
-$table_name_product_allergens = $wpdb->prefix . "prisliste_produkt_allergener";
 
 $wpdb->query("DROP TABLE IF EXISTS $table_name_product_ingredients");
-$wpdb->query("DROP TABLE IF EXISTS $table_name_product_allergens");
 $wpdb->query("DROP TABLE IF EXISTS $table_name_main");
 $wpdb->query("DROP TABLE IF EXISTS $table_name_product_category");
