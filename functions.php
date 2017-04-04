@@ -724,6 +724,7 @@ function show_adminpage_product_forms($categories, $post_values) {
                                     } else {
                                         echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></div></td>";
                                     }
+                                    echo "<td><button class='ingredient-delete-button button'>Slett</button></td>";
                                     if ($post_values['ingredient'][$i]['ingredient_id']) {
 
                                         echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
