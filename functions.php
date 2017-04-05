@@ -181,12 +181,18 @@ function load_produktliste_css_admin($hook) {
         return;
     }
 
-    wp_register_style( 'load_produktliste_css_admin', plugins_url('/style/produktliste_admin.css', __FILE__) );
-    wp_enqueue_style( 'load_produktliste_css_admin' );
+
 
     //enqueueing font awsome
     wp_register_style( 'load_font_awsome_min_css', plugins_url('/vendor/font-awesome-4.7.0/css/font-awesome.min.css', __FILE__) );
     wp_enqueue_style( 'load_font_awsome_min_css' );
+
+    //enqueueing Toastr
+    wp_register_style( 'load_toastr_min_css', plugins_url('/vendor/toastr/toastr.min.css', __FILE__) );
+    wp_enqueue_style( 'load_toastr_min_css' );
+
+    wp_register_style( 'load_produktliste_css_admin', plugins_url('/style/produktliste_admin.css', __FILE__) );
+    wp_enqueue_style( 'load_produktliste_css_admin' );
 }
 
 //functions for loading javascript
@@ -205,6 +211,9 @@ function load_produktliste_js_admin($hook){
 
     wp_register_script( 'produktliste_script', plugins_url( '/js/produktliste_admin.js', __FILE__ ), array( 'jquery' ) );
     wp_enqueue_script('produktliste_script');
+
+    wp_register_script( 'toastr_script', plugins_url( '/vendor/toastr/toastr.min.js', __FILE__ ), array( 'jquery' ) );
+    wp_enqueue_script('toastr_script');
 }
 
 /****************************************
@@ -294,7 +303,7 @@ function show_create_new_or_edit_categories($categories, $post_values_cat) {
                     </tbody>
                 </table>
             </form>
-            <form method="POST">
+            <form method="POST" id="delete_category_form">
                 <input type="hidden" name="edit_or_delete_category" value="true" />
                 <?php
                 wp_nonce_field( 'produktliste_edit_or_delete_category_update', 'produktliste_edit_or_delete_category_form' );
@@ -524,7 +533,7 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
                                                 </form>
                                             </div>
                                             <div>
-                                                <form method='POST'>
+                                                <form method='POST' id='delete_product_form'>
                                                     <input type='hidden' name='delete_product' value='true' />" .
                                                     wp_nonce_field( 'produktliste_product_delete_update', 'produktliste_product_delete_form' ) . "
                                                     <p class='submit'>
@@ -782,9 +791,27 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
         $post_values_cat['errormessage'] = validate_category_name( $post_values_cat['category_name'] );
         if ( count($post_values_cat['errormessage']) !== 0  ) {
             ?>
-            <div class="error">
-                <p>Vennligst fiks feilen!</p>
-            </div>
+            <script>
+              toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+              };
+              toastr.warning('<br /><br />Vennligst fiks feilene!<br /><br />');
+            </script>
+
             <?php
             return $post_values_cat;
         } else {
@@ -810,9 +837,26 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
 
         //outputting the success message
         ?>
-        <div class="updated">
-            <p>Lagret kategori.</p>
-        </div>
+        <script>
+          toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-top-center",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+          };
+          toastr.success('<br /><br />Kategorien er lagret<br /><br />');
+        </script>
         <?php
     }
 }
@@ -822,9 +866,27 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_mai
         ! isset( $_POST['produktliste_edit_or_delete_category_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_edit_or_delete_category_form'], 'produktliste_edit_or_delete_category_update' )
     ){  ?>
-        <div class="error">
-            <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
-        </div>
+      <script>
+        toastr.options = {
+          "closeButton": false,
+          "debug": false,
+          "newestOnTop": false,
+          "progressBar": false,
+          "positionClass": "toast-top-center",
+          "preventDuplicates": false,
+          "onclick": null,
+          "showDuration": "300",
+          "hideDuration": "1000",
+          "timeOut": "5000",
+          "extendedTimeOut": "1000",
+          "showEasing": "swing",
+          "hideEasing": "linear",
+          "showMethod": "fadeIn",
+          "hideMethod": "fadeOut"
+        };
+        toastr.warning('<br /><br />Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.<br /><br />');
+      </script>
+
         <?php
         exit;
     } else {
@@ -857,22 +919,52 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_mai
                         'category_id' => $cat_id
                     ), array( '%d' ) )
                     or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
-                $wpdb->last_query;
-                $wpdb->last_error;
-
-
                 ?>
-                <div class="updated">
-                    <p>Kategori slettet.</p>
-                </div>
+                <script>
+                  toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                  };
+                  toastr.success('<br /><br />Kategori slettet.<br /><br />');
+                </script>
                 <?php
 
             } else {
                 //products in the category, not safe to delete
                 ?>
-                <div class="error">
-                    <p>Det er produkter i denne kategorien, og kategorier kan bare slettes hvis de ikke inneholder produkter.</p>
-                </div>
+                <script>
+                  toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "10000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                  };
+                  toastr.warning('<br /><br />Det er produkter i denne kategorien, og kategorier kan bare slettes hvis de ikke inneholder produkter.<br /><br />');
+                </script>
                 <?php
                 return $post_values_cat;
             }
@@ -881,14 +973,28 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_mai
 
         } else {
             ?>
-            <div class="error">
-                <p>Det har skjedd en feil. Vennligst prøv igjen.</p>
-            </div>
+            <script>
+              toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+              };
+              toastr.warning('<br /><br />Det har skjedd en feil. Vennligst prøv igjen.<br /><br />');
+            </script>
             <?php
             }
-
-
-
     }
 }
 
@@ -899,9 +1005,27 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         ! isset( $_POST['produktliste_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
     ){ ?>
-        <div class="error">
-            <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
-        </div> <?php
+      <script>
+        toastr.options = {
+          "closeButton": false,
+          "debug": false,
+          "newestOnTop": false,
+          "progressBar": false,
+          "positionClass": "toast-top-center",
+          "preventDuplicates": false,
+          "onclick": null,
+          "showDuration": "300",
+          "hideDuration": "1000",
+          "timeOut": "5000",
+          "extendedTimeOut": "1000",
+          "showEasing": "swing",
+          "hideEasing": "linear",
+          "showMethod": "fadeIn",
+          "hideMethod": "fadeOut"
+        };
+        toastr.warning('<br /><br />Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.<br /><br />');
+      </script>
+       <?php
         exit;
     } else {
         // Handle our form data
@@ -999,9 +1123,26 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
             if ( count($post_values['validation_errors']) !== 0) {
                 //if there are errors
                 ?>
-                <div class="error">
-                    <p>Vennligst fiks feilene!</p>
-                </div>
+                <script>
+                  toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                  };
+                  toastr.warning('<br /><br />Vennligst fiks feilene!<br /><br />');
+                </script>
                 <?php
                 return $post_values;
 
@@ -1020,9 +1161,26 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 //checking for error uploading the file
                 if ( is_wp_error($image_id) ) {
                     ?>
-                    <div class="error">
-                        <p>Opplasting av bildet feilet. Vennligst prøv igjen.!</p>
-                    </div>
+                    <script>
+                      toastr.options = {
+                        "closeButton": false,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": false,
+                        "positionClass": "toast-top-center",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                      };
+                      toastr.warning('<br /><br />Opplasting av bildet feilet. Vennligst prøv igjen.!<br /><br />');
+                    </script>
                     <?php
                     return $post_values;
                 }
@@ -1101,9 +1259,26 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     }
                 }
                 ?>
-                <div class="updated">
-                    <p>Produkt lagret.</p>
-                </div>
+                <script>
+                  toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                  };
+                  toastr.success('<br /><br />Produkt er lagt til.<br /><br />');
+                </script>
                 <?php
             }
         } else {
@@ -1158,9 +1333,26 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     delete_specified_ingredients( $wpdb, $table_name_product_ingredients, $product_ingredients, $post_values['ingredient'] );
                 }
                 ?>
-                <div class="updated">
-                    <p>Produkt lagret.</p>
-                </div>
+                <script>
+                  toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                  };
+                  toastr.success('<br /><br />Produkt lagret.<br /><br />');
+                </script>
                 <?php
             }
         }
@@ -1263,21 +1455,52 @@ function produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $
 
             //outputting the success message
             ?>
-            <div class="updated">
-                <p>Product slettet.</p>
-            </div>
+            <script>
+              toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+              };
+              toastr.success('<br /><br />Produktet er slettet<br /><br />');
+            </script>
             <?php
         } else {
             //outputting error message
             ?>
-            <div class="error">
-                <p>Det har skjedd en feil. Vennligst prøv igjen..</p>
-            </div>
+            <script>
+              toastr.options = {
+                "closeButton": false,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+              };
+              toastr.warning('<br /><br />Det har skjedd en feil. Vennligst prøv igjen.<br /><br />');
+            </script>
             <?php
-
         }
-
-
     }
 }
 
