@@ -110,7 +110,7 @@
               "hideMethod": "fadeOut",
               "tapToDismiss": false
             };
-            toastr.error('<br /><br />Er du sikker på at du vil slette dette produktet?<br /><br /><br /><button id="delete_category_yes" type="button" class="button button-primary" value=true>Ja</button><button id="delete_category_no" type="button" class="button button-warning" value="false">Avbryt</button>');
+            toastr.error('<br /><br />Er du sikker på at du vil slette denne kategorien?<br /><br /><br /><button id="delete_category_yes" type="button" class="button button-primary" value=true>Ja</button><button id="delete_category_no" type="button" class="button button-warning" value="false">Avbryt</button>');
 
             $( '#delete_category_yes' ).click(function(e){
               preventOk = true;
