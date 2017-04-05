@@ -339,7 +339,7 @@ function show_produktliste() {
     } else {
         ?>
         <div class="produktliste_wrapper">
-            <div><h1 class="hv-header_first">Produkter</h1></div>
+            <div><h1 class="hv-header hv-header_first">Produkter</h1></div>
             <?php
             //loop for each category
             foreach ($categories as $category) {
@@ -412,7 +412,7 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
     if ( empty($produktliste_results) || empty($categories) ) {
         ?>
         <div class="produktliste_wrapper">
-            <div><h1 class="hv-header_first">Eksisterende produkter i Produktlisten</h1></div>
+            <div><h1 class="hv-header hv-header_first">Eksisterende produkter i Produktlisten</h1></div>
             <div><p>Det er ikke lagt til noen produkter i produktlisten.</p></div>
         </div>
         <?php
