@@ -702,53 +702,52 @@ function show_adminpage_product_forms($categories, $post_values) {
                         </tbody>
                     </table>
                     <div class="ingredients-div-container">
-                    <table class="form-table">
-                        <tbody>
-                        <tr>
-                            <th><h3>Ingredienser</h3></th>
-                            <td></td>
-                            <td><p class="float-right allergen-titel">Allergen?</p></td>
-                        </tr>
-                        <?php
-                        //if no ingredients were added for a new product
-                        if ($post_values['validation_errors']['ingredients_number']) {
-                            echo '<tr><th></th><td>';
-                            echo $post_values['validation_errors']['ingredients_number'];
-                            echo '</td></tr>';
-                        }
-                        //loop for ingredients
-                        if ( count($post_values['ingredient']) !== 0) {
-                            for ($i = 0; $i < count($post_values['ingredient']); $i++) {
-                                echo "<tr>
-                                    <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
-                                    <td>
-                                        <input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' />";
-                                        if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
-                                            echo '<p>' . $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] . '</p>';
-                                        }
-
-                                    echo "</td>";
-                                    if ( $post_values['ingredient'][$i]['allergen'] === 1) {
-                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></div></td>";
-                                    } else {
-                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></div></td>";
-                                    }
-                                    echo "<td><button class='ingredient-delete-button button'>Slett</button></td>";
-                                    if ($post_values['ingredient'][$i]['ingredient_id']) {
-
-                                        echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
-                                    }
-                                echo "</tr>";
+                        <table class="form-table">
+                            <tbody>
+                            <tr>
+                                <th><h3>Ingredienser</h3></th>
+                                <td></td>
+                                <td><p class="float-right allergen-titel">Allergen?</p></td>
+                            </tr>
+                            <?php
+                            //if no ingredients were added for a new product
+                            if ($post_values['validation_errors']['ingredients_number']) {
+                                echo '<tr><th></th><td>';
+                                echo $post_values['validation_errors']['ingredients_number'];
+                                echo '</td></tr>';
                             }
-                        }
-                        ?>
-                        <tr id="ingredients_wrapper">
-                            <th></th>
-                            <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                  </div>
+                            //loop for ingredients
+                            if ( count($post_values['ingredient']) !== 0) {
+                                for ($i = 0; $i < count($post_values['ingredient']); $i++) {
+                                    echo "<tr>
+                                        <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
+                                        <td>
+                                            <input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' />";
+                                            if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
+                                                echo '<p>' . $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] . '</p>';
+                                            }
+
+                                        echo "</td>";
+                                        if ( $post_values['ingredient'][$i]['allergen'] === 1) {
+                                            echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></div></td>";
+                                        } else {
+                                            echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></div></td>";
+                                        }
+                                        echo "<td><input type='hidden' name='ingredient[" . ($i) . "][" . 'remove' . "]' value='0'/><button class='ingredient-delete-button button'>Slett</button></td>";
+                                        if ($post_values['ingredient'][$i]['ingredient_id']) {
+                                            echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
+                                        }
+                                    echo "</tr>";
+                                }
+                            }
+                            ?>
+                            <tr id="ingredients_wrapper">
+                                <th></th>
+                                <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <p class="submit">
                         <input type="submit" name="submit" class="button button-primary button-large" value="Lagre Produkt">
                     </p>
@@ -1044,8 +1043,8 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         $post_values['price_type'] = absint($_POST['price_type']);
         $post_values['alt_txt'] = sanitize_text_field($_POST['alt_txt']);
 
-        for ($i = 0; $i < count($produkt_ingredients); $i++) {
-            $post_values['ingredient'][$i] = $produkt_ingredients[$i];
+        for ($i = 0; $i < count($product_ingredients); $i++) {
+            $post_values['ingredient'][$i] = $product_ingredients[$i];
         }
 
         //validating the inputs as they are declared
@@ -1073,17 +1072,43 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     if ( absint($ingredient['ingredient_id']) !== 0 ) {
                         $post_values['ingredient'][$count]['ingredient_id'] = absint($ingredient['ingredient_id']);
                     }
-
                 }
+                $post_values['ingredient'][$count]['remove'] = absint($ingredient['remove']);
 
                 //only validating ingredient name since allergen is a boolean and ingredient_id is an id number(
-                if (validate_ingredient($post_values['ingredient'][$count]['ingredient_name']) !== NULL) {
-                    $post_values['validation_errors']['ingredient'][$count]['ingredient_name'] = validate_ingredient($post_values['ingredient'][$count]['ingredient_name']);
+                if ( $post_values['ingredient'][$count]['remove'] === 0 ) {
+                    if (validate_ingredient($post_values['ingredient'][$count]['ingredient_name']) !== NULL) {
+                        $post_values['validation_errors']['ingredient'][$count]['ingredient_name'] = validate_ingredient($post_values['ingredient'][$count]['ingredient_name'] !== NULL);
+                    }
                 }
                 $count++;
             }
         } else {
             $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
+        }
+
+        function delete_specified_ingredients($wpdb, $table_name, $stored_ingredients_array, $post_ingredients_array) {
+            foreach ( $post_ingredients_array as $post_ingredient ) {
+                foreach ( $stored_ingredients_array as $stored_ingredient) {
+                    if ( $post_ingredient['ingredient_id'] === absint($stored_ingredient['id']) ) {
+                        if ( $post_ingredient['remove'] === 1 ) {
+                            //delete the correct ingredients
+                            $wpdb->delete( $table_name, array(
+                                'ID' => $stored_ingredient['id']
+                            ), array( '%d' ) )
+                            or die ( 'Det har skjedd en feil. Vennligst prøv igjen. test' );
+                        }
+                    }
+                }
+            }
+        }
+
+        if ( $post_values['product_id'] !== 0) {
+            $product_ingredients = $wpdb->get_results( $wpdb->prepare( "
+            SELECT i.id
+            FROM {$table_name_main} m, {$table_name_product_ingredients} i
+            WHERE m.id = i.product_id
+            AND m.id = %d", $post_values['product_id']), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
         }
 
         //if the user is editing an existing product and adds a new image OR creating a new product; add the image to post_values variable and validate it
@@ -1162,6 +1187,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 
                 //new product
                 if (!$post_values['editing_status'] === TRUE) {
+
                     //store new product with reference to image
                     $wpdb->insert( $table_name_main, array(
                             'product_name' => $post_values['productname'],
@@ -1175,12 +1201,14 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     $id_of_new_product = $wpdb->insert_id;
 
                     foreach ($post_values['ingredient'] as $ingredient) {
-                        $wpdb->insert( $table_name_product_ingredients, array(
-                                'product_id' => $id_of_new_product,
-                                'ingredient_name' => $ingredient['ingredient_name'],
-                                'allergen' => $ingredient['allergen']
-                            ), array( '%d', '%s', '%d' )
-                        );
+                        if ($ingredient['remove'] !== 1) {
+                            $wpdb->insert( $table_name_product_ingredients, array(
+                                    'product_id' => $id_of_new_product,
+                                    'ingredient_name' => $ingredient['ingredient_name'],
+                                    'allergen' => $ingredient['allergen']
+                                ), array( '%d', '%s', '%d' )
+                            );
+                        }
                     }
                 } else {
                     //existing product with a new image
@@ -1204,25 +1232,28 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     );
 
                     foreach ($post_values['ingredient'] as $ingredient) {
-                        //if new ingredient(no ingredient_id)
-                        if (!$ingredient['ingredient_id']) {
-                            $wpdb->insert( $table_name_product_ingredients, array(
+                        if ($ingredient['remove'] !== 1) {
+                            //if new ingredient(no ingredient_id)
+                            if (!$ingredient['ingredient_id']) {
+                                $wpdb->insert( $table_name_product_ingredients, array(
                                     'product_id' => $post_values['product_id'],
                                     'ingredient_name' => $ingredient['ingredient_name'],
                                     'allergen' => $ingredient['allergen']
                                 ), array( '%d', '%s', '%d' )
-                            );
-                        } else {
-                            //else update(has ingredient id)
-                            $wpdb->update( $table_name_product_ingredients,
-                                array(
-                                    'ingredient_name' => $ingredient['ingredient_name'],
-                                    'allergen' => $ingredient['allergen']),
-                                array('ID' => $ingredient['ingredient_id']),
-                                array( '%s', '%d' ),
-                                array( '%d' )
-                            );
+                                );
+                            } else {
+                                //else update(has ingredient id)
+                                $wpdb->update( $table_name_product_ingredients,
+                                    array(
+                                        'ingredient_name' => $ingredient['ingredient_name'],
+                                        'allergen' => $ingredient['allergen']),
+                                    array('ID' => $ingredient['ingredient_id']),
+                                    array( '%s', '%d' ),
+                                    array( '%d' )
+                                );
+                            }
                         }
+                        delete_specified_ingredients( $wpdb, $table_name_product_ingredients, $product_ingredients, $post_values['ingredient'] );
                         //delete old picture
                         wp_delete_attachment( $old_image_id['picture_id'] );
                     }
@@ -1278,25 +1309,28 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 );
 
                 foreach ($post_values['ingredient'] as $ingredient) {
-                    //if new ingredient(no ingredient_id)
-                    if (!$ingredient['ingredient_id']) {
-                        $wpdb->insert($table_name_product_ingredients, array(
-                            'product_id' => $post_values['product_id'],
-                            'ingredient_name' => $ingredient['ingredient_name'],
-                            'allergen' => $ingredient['allergen']
-                        ), array('%d', '%s', '%d')
-                        );
-                    } else {
-                        //else update(has ingredient id)
-                        $wpdb->update($table_name_product_ingredients,
-                            array(
+                    if ($ingredient['remove'] !== 1) {
+                        //if new ingredient(no ingredient_id)
+                        if (!$ingredient['ingredient_id']) {
+                            $wpdb->insert($table_name_product_ingredients, array(
+                                'product_id' => $post_values['product_id'],
                                 'ingredient_name' => $ingredient['ingredient_name'],
-                                'allergen' => $ingredient['allergen']),
-                            array('ID' => $ingredient['ingredient_id']),
-                            array('%s', '%d'),
-                            array('%d')
-                        );
+                                'allergen' => $ingredient['allergen']
+                            ), array('%d', '%s', '%d')
+                            );
+                        } else {
+                            //else update(has ingredient id)
+                            $wpdb->update($table_name_product_ingredients,
+                                array(
+                                    'ingredient_name' => $ingredient['ingredient_name'],
+                                    'allergen' => $ingredient['allergen']),
+                                array('ID' => $ingredient['ingredient_id']),
+                                array('%s', '%d'),
+                                array('%d')
+                            );
+                        }
                     }
+                    delete_specified_ingredients( $wpdb, $table_name_product_ingredients, $product_ingredients, $post_values['ingredient'] );
                 }
                 ?>
                 <script>
@@ -1320,7 +1354,6 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                   toastr.success('<br /><br />Produkt lagret.<br /><br />');
                 </script>
                 <?php
-
             }
         }
     }
@@ -1347,7 +1380,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
           AND ID = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
         //querying db for data on the products ingredients
-        $produkt_ingredients = $wpdb->get_results( $wpdb->prepare( "
+        $product_ingredients = $wpdb->get_results( $wpdb->prepare( "
           SELECT i.id, i.ingredient_name, i.allergen
           FROM {$table_name_main} m, {$table_name_product_ingredients} i
           WHERE m.id = i.product_id
@@ -1362,10 +1395,10 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         $post_values['alt_txt'] = $product['picture_alt_tag'];
         $post_values['image'] = $product['picture_id'];
 
-        for ($i = 0; $i < count($produkt_ingredients); $i++) {
-            $post_values['ingredient'][$i]['ingredient_id'] = absint($produkt_ingredients[$i]['id']);
-            $post_values['ingredient'][$i]['ingredient_name'] = $produkt_ingredients[$i]['ingredient_name'];
-            $post_values['ingredient'][$i]['allergen'] = absint($produkt_ingredients[$i]['allergen']);
+        for ($i = 0; $i < count($product_ingredients); $i++) {
+            $post_values['ingredient'][$i]['ingredient_id'] = absint($product_ingredients[$i]['id']);
+            $post_values['ingredient'][$i]['ingredient_name'] = $product_ingredients[$i]['ingredient_name'];
+            $post_values['ingredient'][$i]['allergen'] = absint($product_ingredients[$i]['allergen']);
         }
 
         $post_values['editing_status'] = TRUE;
@@ -1523,7 +1556,7 @@ function produktliste_setup_menu() {
             FROM    {$table_name_main}
         ", ARRAY_A);
 
-        //query db for data on ingredients and allergens
+        //query db for data on ingredients
         $ingredients = $wpdb->get_results("
             SELECT product_id, ingredient_name, allergen
             FROM    {$table_name_product_ingredients}
@@ -1635,7 +1668,7 @@ function validate_image($img) {
 
 function validate_ingredient($ingredient_name) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9(),\&\%\- ]/";
-    if ( $ingredient_name === "") {
+    if ( $ingredient_name === "" ) {
         return '<p>Ingrediensnavnet mangler.</p>';
     } elseif ( preg_match($preg_pattern, $ingredient_name) ) {
         return '<p>Bare store og små bokstaver, tall, bindestrek, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
