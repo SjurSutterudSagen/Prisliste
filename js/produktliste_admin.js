@@ -54,9 +54,18 @@
                 "<th><label for='ingredient[" + count + "]'>Ingrediens " + count + "</label></th>" +
                 "<td><input name='ingredient[" + count + "][" + 'ingredient_name' + "]' type='text' value='' class='regular-text' /></td>" +
                 "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" + count + "][" + 'allergen' + "]' type='checkbox' value='1' class='regular-text' /></div></td>" +
-                "<td><button class='ingredient-delete-button button'>Slett</button></td>" +
+                "<td><input type='hidden' name='ingredient[" + count + "][" + 'remove' + "]' value='0'/><button class='ingredient-delete-button button'>Slett</button></td>" +
                 "</tr>"
             ).insertBefore( '#ingredients_wrapper' );
         });
+
+        //delete ingredient button
+        $( '.ingredients-div-container' ).on('click', '.ingredient-delete-button', function(e){
+            e.preventDefault();
+            this.previousSibling.value = 1;
+            //hide the parent tr
+            $( this ).closest('tr').hide('slow');
+        });
+
     });
 })(jQuery);
