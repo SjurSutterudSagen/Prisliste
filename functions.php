@@ -1095,7 +1095,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                             //delete the correct ingredients
                             $wpdb->delete( $table_name, array(
                                 'ID' => $stored_ingredient['id']
-                            ), array( '%d' ) );
+                            ), array( '%d' ) )
                             or die ( 'Det har skjedd en feil. Vennligst prøv igjen. test' );
                         }
                     }
