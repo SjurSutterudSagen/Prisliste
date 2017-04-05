@@ -14,9 +14,19 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 //drop custom database tables
 global $wpdb;
 
-$table_name_main = $wpdb->prefix . "prisliste_produkter";
-$table_name_product_category = $wpdb->prefix . "prisliste_kategorier";
-$table_name_product_ingredients = $wpdb->prefix . "prisliste_produkt_ingredienser";
+$table_name_main = $wpdb->prefix . "produktliste_produkter";
+$table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+$table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
+
+//querying db for the product images and deleting them
+$produkt_images = $wpdb->get_results( "
+          SELECT picture_id
+          FROM {$table_name_main}
+          ", ARRAY_A)or die ( $wpdb->last_error );
+
+foreach ( $produkt_images as $image ) {
+    wp_delete_attachment( $image['picture_id'] );
+}
 
 $wpdb->query("DROP TABLE IF EXISTS $table_name_product_ingredients");
 $wpdb->query("DROP TABLE IF EXISTS $table_name_main");

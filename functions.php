@@ -13,26 +13,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 *   Functions for Plugin Installation/updating   *
 *************************************************/
 
-//function for dropping db when uninstalling
-function produktliste_drop_db() {
-    //drop custom database tables
-    global $wpdb;
-
-    $table_name_main = $wpdb->prefix . "produktliste_produkter";
-    $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
-    $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
-
-//    //querying db for the product images stored in the media folder
-//    $produkt_images = $wpdb->get_results( "
-//          SELECT picture_id
-//          FROM {$table_name_main}
-//          ", ARRAY_A)or die ( $wpdb->last_error );
-
-    $wpdb->query("DROP TABLE IF EXISTS $table_name_product_ingredients");
-    $wpdb->query("DROP TABLE IF EXISTS $table_name_main");
-    $wpdb->query("DROP TABLE IF EXISTS $table_name_product_category");
-}
-
 //Function for creating the DB tables on plugin activation
 function produktliste_install() {
 
@@ -125,30 +105,6 @@ function produktliste_install() {
 
         update_option( 'produktliste_db_version', $produktliste_db_version );
     }
-}
-
-//function for creating 2 dummy categories
-function produktliste_install_data() {
-    global $wpdb;
-
-    $table_name_main = $wpdb->prefix . "produktliste_produkter";
-    $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
-    $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
-
-    //category table
-    $wpdb->insert(
-        $table_name_product_category,
-        array(
-            'category_name' => 'Kjøtt'
-        )
-    );
-
-    $wpdb->insert(
-        $table_name_product_category,
-        array(
-            'category_name' => 'Pølser'
-        )
-    );
 }
 
 //function for update check on the db for new plugin version
@@ -383,7 +339,7 @@ function show_produktliste() {
     } else {
         ?>
         <div class="produktliste_wrapper">
-            <div><h1 class="hv-header_first">Produkter</h1></div>
+            <div><h1 class="hv-header hv-header_first">Produkter</h1></div>
             <?php
             //loop for each category
             foreach ($categories as $category) {
@@ -456,7 +412,7 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
     if ( empty($produktliste_results) || empty($categories) ) {
         ?>
         <div class="produktliste_wrapper">
-            <div><h1 class="hv-header_first">Eksisterende produkter i Produktlisten</h1></div>
+            <div><h1 class="hv-header hv-header_first">Eksisterende produkter i Produktlisten</h1></div>
             <div><p>Det er ikke lagt til noen produkter i produktlisten.</p></div>
         </div>
         <?php
