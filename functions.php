@@ -920,8 +920,6 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_mai
                         'category_id' => $cat_id
                     ), array( '%d' ) )
                     or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
-                echo $wpdb->last_query;
-                echo $wpdb->last_error;
                 ?>
                 <script>
                   toastr.options = {
