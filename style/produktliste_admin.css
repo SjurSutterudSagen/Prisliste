@@ -4,6 +4,15 @@
  * Edit by Dag-Roger on 03.04.2017
  */
 
+
+ #delete_product_yes {
+   margin-right: 10px;
+ }
+
+ #toast-container>div {
+   opacity: 1;
+ }
+
  div.produktliste_wrapper {
 
  }

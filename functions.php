@@ -181,8 +181,7 @@ function load_produktliste_css_admin($hook) {
         return;
     }
 
-    wp_register_style( 'load_produktliste_css_admin', plugins_url('/style/produktliste_admin.css', __FILE__) );
-    wp_enqueue_style( 'load_produktliste_css_admin' );
+
 
     //enqueueing font awsome
     wp_register_style( 'load_font_awsome_min_css', plugins_url('/vendor/font-awesome-4.7.0/css/font-awesome.min.css', __FILE__) );
@@ -191,6 +190,9 @@ function load_produktliste_css_admin($hook) {
     //enqueueing Toastr
     wp_register_style( 'load_toastr_min_css', plugins_url('/vendor/toastr/toastr.min.css', __FILE__) );
     wp_enqueue_style( 'load_toastr_min_css' );
+
+    wp_register_style( 'load_produktliste_css_admin', plugins_url('/style/produktliste_admin.css', __FILE__) );
+    wp_enqueue_style( 'load_produktliste_css_admin' );
 }
 
 //functions for loading javascript
@@ -301,7 +303,7 @@ function show_create_new_or_edit_categories($categories, $post_values_cat) {
                     </tbody>
                 </table>
             </form>
-            <form method="POST">
+            <form method="POST" id="delete_category_form">
                 <input type="hidden" name="edit_or_delete_category" value="true" />
                 <?php
                 wp_nonce_field( 'produktliste_edit_or_delete_category_update', 'produktliste_edit_or_delete_category_form' );
@@ -531,7 +533,7 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
                                                 </form>
                                             </div>
                                             <div>
-                                                <form method='POST'>
+                                                <form method='POST' id='delete_product_form'>
                                                     <input type='hidden' name='delete_product' value='true' />" .
                                                     wp_nonce_field( 'produktliste_product_delete_update', 'produktliste_product_delete_form' ) . "
                                                     <p class='submit'>
@@ -918,7 +920,6 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_mai
                         'category_id' => $cat_id
                     ), array( '%d' ) )
                     or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
-
                 ?>
                 <script>
                   toastr.options = {

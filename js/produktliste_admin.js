@@ -57,5 +57,71 @@
                 "</tr>"
             ).insertBefore( '#ingredients_wrapper' );
         });
+
+          $( 'input[name=delete_product_submit]' ).click(function(e){
+            e.preventDefault();
+            toastr.options = {
+              "closeButton": true,
+              "debug": false,
+              "newestOnTop": false,
+              "progressBar": false,
+              "positionClass": "toast-top-center",
+              "preventDuplicates": false,
+              "onclick": null,
+              "showDuration": "300",
+              "hideDuration": "1000",
+              "timeOut": "0",
+              "extendedTimeOut": "0",
+              "showEasing": "swing",
+              "hideEasing": "linear",
+              "showMethod": "fadeIn",
+              "hideMethod": "fadeOut",
+              "tapToDismiss": false
+            };
+            toastr.error('<br /><br />Er du sikker på at du vil slette dette produktet?<br /><br /><br /><button id="delete_product_yes" type="button" class="button button-primary" value=true>Ja</button><button id="delete_product_no" type="button" class="button button-warning" value="false">Avbryt</button>');
+
+            $( '#delete_product_yes' ).click(function(e){
+              $('#delete_product_form').submit();
+            });
+            $( '#delete_product_no' ).click(function(e){
+              toastr.remove();
+            });
+          });
+
+
+          var preventOk = false;
+          $( 'input[name=delete_category_submit]' ).click(function(e){
+            e.preventDefault();
+            toastr.options = {
+              "closeButton": true,
+              "debug": false,
+              "newestOnTop": false,
+              "progressBar": false,
+              "positionClass": "toast-top-center",
+              "preventDuplicates": false,
+              "onclick": null,
+              "showDuration": "300",
+              "hideDuration": "1000",
+              "timeOut": "0",
+              "extendedTimeOut": "0",
+              "showEasing": "swing",
+              "hideEasing": "linear",
+              "showMethod": "fadeIn",
+              "hideMethod": "fadeOut",
+              "tapToDismiss": false
+            };
+            toastr.error('<br /><br />Er du sikker på at du vil slette denne kategorien?<br /><br /><br /><button id="delete_category_yes" type="button" class="button button-primary" value=true>Ja</button><button id="delete_category_no" type="button" class="button button-warning" value="false">Avbryt</button>');
+
+            $( '#delete_category_yes' ).click(function(e){
+              preventOk = true;
+
+              if (preventOk) {
+                $("<input name='delete_category_submit' type='hidden' value='Slett kategori''>").insertBefore( 'input[name=delete_category_submit] ' );
+                $( '#delete_category_form' ).submit();
+              }
+            });
+
+            $( '#delete_category_no' ).click(function(e){toastr.remove();});
+          });
     });
 })(jQuery);
