@@ -316,18 +316,20 @@ function show_produktliste() {
     $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredienser";
 
     //query the db for categories
-    $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A);
+    $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category ORDER BY category_name", ARRAY_A);
 
     //query the db for all products with category name
     $produktliste_results =  $wpdb->get_results("
         SELECT id, category, product_name, price, price_type, weight, picture_id, picture_alt_tag
         FROM    {$table_name_main}
+        ORDER BY product_name
     ", ARRAY_A);
 
     //query db for data on ingredients and allergens
     $ingredients = $wpdb->get_results("
         SELECT product_id, ingredient_name, allergen
         FROM    {$table_name_product_ingredients}
+        ORDER BY ingredient_name
     ", ARRAY_A);
 
     //building the html output
@@ -1370,7 +1372,8 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
           SELECT i.id, i.ingredient_name, i.allergen
           FROM {$table_name_main} m, {$table_name_product_ingredients} i
           WHERE m.id = i.product_id
-          AND m.id = %d", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+          AND m.id = %d
+          ORDER BY i.ingredient_name", $product_id), ARRAY_A)or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
 
         //updating $post_values with correct values
         $post_values['product_id'] = $product['id'];
@@ -1535,18 +1538,20 @@ function produktliste_setup_menu() {
         $ingredients;
 
         //query the db for categories
-        $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category", ARRAY_A);
+        $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category ORDER BY category_name", ARRAY_A);
 
         //query the db for all products
         $produktliste_results =  $wpdb->get_results("
             SELECT id, category, product_name, price, price_type, weight, picture_id, picture_alt_tag
             FROM    {$table_name_main}
+            ORDER BY product_name
         ", ARRAY_A);
 
         //query db for data on ingredients
         $ingredients = $wpdb->get_results("
             SELECT product_id, ingredient_name, allergen
             FROM    {$table_name_product_ingredients}
+            ORDER BY ingredient_name
         ", ARRAY_A);
 
 
