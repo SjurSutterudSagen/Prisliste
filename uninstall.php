@@ -11,6 +11,18 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
     die;
 }
 
+//removing custom userrole capabilities
+$role = get_role( 'editor' );
+$role->remove_cap( 'produktliste_cap' );
+
+$role = get_role( 'administrator' );
+$role->remove_cap( 'produktliste_cap' );
+
+if ( get_role( 'shop_manager' !== NULL )) {
+    $role = get_role( 'shop_manager' );
+    $role->remove_cap( 'produktliste_cap' );
+}
+
 //drop custom database tables
 global $wpdb;
 
@@ -22,10 +34,12 @@ $table_name_product_ingredients = $wpdb->prefix . "produktliste_produkt_ingredie
 $produkt_images = $wpdb->get_results( "
           SELECT picture_id
           FROM {$table_name_main}
-          ", ARRAY_A)or die ( $wpdb->last_error );
+          ", ARRAY_A);
 
-foreach ( $produkt_images as $image ) {
-    wp_delete_attachment( $image['picture_id'] );
+if ( !empty($produkt_images) ) {
+    foreach ( $produkt_images as $image ) {
+        wp_delete_attachment( $image['picture_id'] );
+    }
 }
 
 $wpdb->query("DROP TABLE IF EXISTS $table_name_product_ingredients");
