@@ -6,12 +6,6 @@ Author: Sjur Sutterud Sagen, <a href="https://eriksendesign.no/">Dag-Roger Eriks
 Version: 1.0
 */
 
-/*****
- * Tutorials Used:
- * https://codex.wordpress.org/Creating_Tables_with_Plugins
- * https://codex.wordpress.org/Shortcode_API
- *****/
-
 //security check for XSS attack
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
