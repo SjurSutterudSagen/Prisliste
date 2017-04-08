@@ -1042,13 +1042,15 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
         function delete_specified_ingredients($wpdb, $table_name, $stored_ingredients_array, $post_ingredients_array) {
             foreach ( $post_ingredients_array as $post_ingredient ) {
                 foreach ( $stored_ingredients_array as $stored_ingredient) {
-                    if ( $post_ingredient['ingredient_id'] === absint($stored_ingredient['id']) ) {
-                        if ( $post_ingredient['remove'] === 1 ) {
+                    if ( (isset($post_ingredient['ingredient_id']) && isset($stored_ingredient['id']))
+                        && ($post_ingredient['ingredient_id'] === absint($stored_ingredient['id'])) ) {
+                        if ( isset($post_ingredient['remove']) && ($post_ingredient['remove'] === 1) ) {
                             //delete the correct ingredients
                             $wpdb->delete( $table_name, array(
-                                'ID' => $stored_ingredient['id']
+                                'ID' => absint($stored_ingredient['id'])
                             ), array( '%d' ) )
                             or die ( 'Det har skjedd en feil. Vennligst prøv igjen.' );
+                            break;
                         }
                     }
                 }
@@ -1124,7 +1126,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 
         //if the user is editing an existing product and adds a new image OR creating a new product; add the image to post_values variable and validate it
         if ( ( ( isset($post_values['editing_status']) && ($post_values['editing_status'] === TRUE) ) && ($_FILES['product_image']['error'] === 0) )
-            || ( isset($post_values['editing_status']) && (!$post_values['editing_status'] === TRUE) ) ) {
+            || ( !isset($post_values['editing_status']) ) ) {
             $post_values['image'] = $_FILES['product_image'];
 
             if (validate_image($post_values['image']) !== NULL) {
@@ -1213,6 +1215,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                     );
                     $id_of_new_product = $wpdb->insert_id;
 
+
                     foreach ($post_values['ingredient'] as $ingredient) {
                         if ($ingredient['remove'] !== 1) {
                             $wpdb->insert( $table_name_product_ingredients, array(
@@ -1267,10 +1270,10 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                                 );
                             }
                         }
-                        delete_specified_ingredients( $wpdb, $table_name_product_ingredients, $product_ingredients, $post_values['ingredient'] );
                         //delete old picture
                         wp_delete_attachment( $old_image_id['picture_id'] );
                     }
+                    delete_specified_ingredients( $wpdb, $table_name_product_ingredients, $product_ingredients, $post_values['ingredient'] );
                 }
                 ?>
                 <script>
@@ -1345,8 +1348,8 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                             );
                         }
                     }
-                    delete_specified_ingredients( $wpdb, $table_name_product_ingredients, $product_ingredients, $post_values['ingredient'] );
                 }
+                delete_specified_ingredients( $wpdb, $table_name_product_ingredients, $product_ingredients, $post_values['ingredient'] );
                 ?>
                 <script>
                   toastr.options = {
