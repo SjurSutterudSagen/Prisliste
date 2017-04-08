@@ -135,11 +135,9 @@ function load_produktliste_css() {
 
 function load_produktliste_css_admin($hook) {
     // Load only on correct admin page for the plugin
-    if($hook != 'toplevel_page_produktliste-plugin') {
+    if( ($hook != 'toplevel_page_produktliste') && ($hook != 'produktliste_page_produktliste-produkter') ) {
         return;
     }
-
-
 
     //enqueueing font awsome
     wp_register_style( 'load_font_awsome_min_css', plugins_url('/vendor/font-awesome-4.7.0/css/font-awesome.min.css', __FILE__) );
@@ -163,7 +161,7 @@ function load_produktliste_js(){
 
 function load_produktliste_js_admin($hook){
     // Load only on correct admin page for the plugin
-    if($hook != 'toplevel_page_produktliste-plugin') {
+    if( ($hook != 'toplevel_page_produktliste') && ($hook != 'produktliste_page_produktliste-produkter') ) {
         return;
     }
 
@@ -419,13 +417,18 @@ function show_produktliste() {
 
 //function for building the html part for admin page productliste
 function show_produktliste_admin($categories, $produktliste_results, $ingredients) {
-    if ( empty($produktliste_results) || empty($categories) ) {
-        ?>
-        <div class="produktliste_wrapper">
-            <div><h1 class="hv-header hv-header_first">Eksisterende produkter i Produktlisten</h1></div>
-            <div><p>Det er ikke lagt til noen produkter i produktlisten.</p></div>
-        </div>
-        <?php
+    if ( empty($produktliste_results) ) {
+        if ( empty($categories) ) {
+            //do nothing since no categories exists
+        } else {
+            ?>
+            <div class="produktliste_wrapper">
+                <div><h1 class="hv-header hv-header_first">Eksisterende produkter i Produktlisten</h1></div>
+                <div><p>Det er ikke lagt til noen produkter i produktlisten.</p></div>
+            </div>
+            <?php
+        }
+
     } else {
         //building the html output
         ?>
@@ -534,211 +537,218 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
 
 function show_adminpage_product_forms($categories, $post_values) {
     if (!empty($categories)) {
+        ?>
+        <div class="form_wrapper_product">
+            <?php
+            if ($post_values['editing_status'] === TRUE) {
+                echo '<h2>Endre produkt</h2>';
+            } else {
+                echo '<h2>Legg til nytt produkt</h2>';
+            }
             ?>
-            <div class="form_wrapper_product">
-                <?php
-                if ($post_values['editing_status'] === TRUE) {
-                    echo '<h2>Endre produkt</h2>';
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="main_form_updated" value="true" />
+                <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
+                if ( $post_values['editing_status'] === TRUE ) {
+                    echo '<input type="hidden" name="editing_status" value="true" />';
                 } else {
-                    echo '<h2>Legg til nytt produkt</h2>';
+                    echo '<input type="hidden" name="editing_status" value="false" />';
+                }
+                if ($post_values['product_id']) {
+                    echo '<input type="hidden" name="prod_id" value="'. esc_attr( $post_values["product_id"] ) .'" />';
+                } else {
+                    echo '<input type="hidden" name="prod_id" value="" />';
                 }
                 ?>
-                <form method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="main_form_updated" value="true" />
-                    <?php wp_nonce_field( 'produktliste_update', 'produktliste_form' );
-                    if ( $post_values['editing_status'] === TRUE ) {
-                        echo '<input type="hidden" name="editing_status" value="true" />';
-                    } else {
-                        echo '<input type="hidden" name="editing_status" value="false" />';
-                    }
-                    if ($post_values['product_id']) {
-                        echo '<input type="hidden" name="prod_id" value="'. esc_attr( $post_values["product_id"] ) .'" />';
-                    } else {
-                        echo '<input type="hidden" name="prod_id" value="" />';
-                    }
-                    ?>
+                <table class="form-table">
+                    <tbody>
+                    <tr>
+                        <th><label for="productname">Produktnavn</label></th>
+                        <td><input name="productname" type="text" value="<?php
+                            if ($post_values['productname']){
+                                echo esc_attr( $post_values['productname'] );
+                            }?>" class="regular-text" />
+                            <?php
+                            //if there is a product name error message
+                            if (count($post_values['validation_errors']['product_name'])) {
+                                echo $post_values['validation_errors']['product_name'];
+                            }
+                            ?>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <th><label for="category">Kategori</label></th>
+                        <td>
+                            <select name="category" type="text" value="" class="regular-text">
+                                <?php
+                                foreach ($categories as $category) {
+                                    if ($post_values['category'] === $category['category_id']) {
+                                        echo "<option value='" . esc_attr( $category['category_id'] ) . "' selected='selected'>" . esc_html( $category['category_name'] ) . "</option>";
+                                    } else {
+                                        echo "<option value='" . esc_attr( $category['category_id'] ) . "'>" . esc_html( $category['category_name'] ) . "</option>";
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="price">Pris (bare tall er tillatt).</label></th>
+                        <td>
+                            <input name="price" type="text" value="<?php
+                            if ($post_values['price']){
+                                echo esc_attr( $post_values['price'] );
+                            }?>" class="regular-text" />
+                            <?php
+                            //if there is a price error message
+                            if (count($post_values['validation_errors']['price'])) {
+                                echo $post_values['validation_errors']['price'];
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="price_type">Pristype</label></th>
+                        <td>
+                            <select name="price_type" type="text" value="" class="regular-text">
+                                <?php
+                                if ($post_values['price_type'] === '0') {
+                                    echo "<option value='0' selected='selected'>kr/kg</option>";
+                                    echo "<option value='1'>kr/stk</option>";
+                                } elseif ($post_values['price_type'] === '1') {
+                                    echo "<option value='0'>kr/kg</option>";
+                                    echo "<option value='1' selected='selected'>kr/stk</option>";
+                                } else {
+                                    echo "<option value='0'>kr/kg</option>";
+                                    echo "<option value='1'>kr/stk</option>";
+                                }
+                                ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="weight">Vekt</label></th>
+                        <td>
+                            <input name="weight" type="text" value="<?php
+                            if ($post_values['weight']){
+                                echo esc_attr( $post_values['weight'] );
+                            }?>" class="regular-text" />
+                            <?php
+                            //if there is a weight error message
+                            if (count($post_values['validation_errors']['weight'])) {
+                                echo $post_values['validation_errors']['weight'];
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="product_image">Last opp bilde</label></th>
+                        <td>
+                            <input type="file" name="product_image">
+                            <?php
+                            //if there is a product image error message
+                            if (count($post_values['validation_errors']['product_image'])) {
+                                echo $post_values['validation_errors']['product_image'];
+                            }
+                            ?>
+                        </td>
+                        <?php
+                        if ( ($post_values['image']) && ( !is_array($post_values['image']) ) ) {
+                            ?>
+                            <tr>
+                                <th>Nåværende bilde</th>
+                                <td>
+                                    <img src="<?php echo wp_get_attachment_url( $post_values['image'] ); ?>" class="produktliste_existing_image"/>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                    </tr>
+                    <tr>
+                        <th><label for="alt_txt">Kort og beskrivende tekst av selve bildet.</label></th>
+                        <td><input name="alt_txt" type="text" value="<?php
+                            if ($post_values['alt_txt']){
+                                echo esc_attr( $post_values['alt_txt'] );
+                            }?>" class="regular-text" />
+                            <?php
+                            //if there is a iamge alt-txt error message
+                            if (count($post_values['validation_errors']['alt_txt'])) {
+                                echo $post_values['validation_errors']['alt_txt'];
+                            }
+                            ?>
+                        </td>
+
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="ingredients-div-container">
                     <table class="form-table">
                         <tbody>
                         <tr>
-                            <th><label for="productname">Produktnavn</label></th>
-                            <td><input name="productname" type="text" value="<?php
-                                if ($post_values['productname']){
-                                    echo esc_attr( $post_values['productname'] );
-                                }?>" class="regular-text" />
-                                <?php
-                                //if there is a product name error message
-                                if (count($post_values['validation_errors']['product_name'])) {
-                                    echo $post_values['validation_errors']['product_name'];
-                                }
-                                ?>
-                            </td>
-
+                            <th><h3>Ingredienser</h3></th>
+                            <td></td>
+                            <td><p class="float-right allergen-titel">Allergen?</p></td>
                         </tr>
-                        <tr>
-                            <th><label for="category">Kategori</label></th>
-                            <td>
-                                <select name="category" type="text" value="" class="regular-text">
-                                    <?php
-                                    foreach ($categories as $category) {
-                                        if ($post_values['category'] === $category['category_id']) {
-                                            echo "<option value='" . esc_attr( $category['category_id'] ) . "' selected='selected'>" . esc_html( $category['category_name'] ) . "</option>";
-                                        } else {
-                                            echo "<option value='" . esc_attr( $category['category_id'] ) . "'>" . esc_html( $category['category_name'] ) . "</option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="price">Pris (bare tall er tillatt).</label></th>
-                            <td>
-                                <input name="price" type="text" value="<?php
-                                if ($post_values['price']){
-                                    echo esc_attr( $post_values['price'] );
-                                }?>" class="regular-text" />
-                                <?php
-                                //if there is a price error message
-                                if (count($post_values['validation_errors']['price'])) {
-                                    echo $post_values['validation_errors']['price'];
-                                }
-                                ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="price_type">Pristype</label></th>
-                            <td>
-                                <select name="price_type" type="text" value="" class="regular-text">
-                                    <?php
-                                    if ($post_values['price_type'] === '0') {
-                                        echo "<option value='0' selected='selected'>kr/kg</option>";
-                                        echo "<option value='1'>kr/stk</option>";
-                                    } elseif ($post_values['price_type'] === '1') {
-                                        echo "<option value='0'>kr/kg</option>";
-                                        echo "<option value='1' selected='selected'>kr/stk</option>";
-                                    } else {
-                                        echo "<option value='0'>kr/kg</option>";
-                                        echo "<option value='1'>kr/stk</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="weight">Vekt</label></th>
-                            <td>
-                                <input name="weight" type="text" value="<?php
-                                if ($post_values['weight']){
-                                    echo esc_attr( $post_values['weight'] );
-                                }?>" class="regular-text" />
-                                <?php
-                                //if there is a weight error message
-                                if (count($post_values['validation_errors']['weight'])) {
-                                    echo $post_values['validation_errors']['weight'];
-                                }
-                                ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="product_image">Last opp bilde</label></th>
-                            <td>
-                                <input type="file" name="product_image">
-                                <?php
-                                //if there is a product image error message
-                                if (count($post_values['validation_errors']['product_image'])) {
-                                    echo $post_values['validation_errors']['product_image'];
-                                }
-                                ?>
-                            </td>
-                            <?php
-                            if ( ($post_values['image']) && ( !is_array($post_values['image']) ) ) {
-                                ?>
-                                <tr>
-                                    <th>Nåværende bilde</th>
+                        <?php
+                        //if no ingredients were added for a new product
+                        if ($post_values['validation_errors']['ingredients_number']) {
+                            echo '<tr><th></th><td>';
+                            echo $post_values['validation_errors']['ingredients_number'];
+                            echo '</td></tr>';
+                        }
+                        //loop for ingredients
+                        if ( count($post_values['ingredient']) !== 0) {
+                            for ($i = 0; $i < count($post_values['ingredient']); $i++) {
+                                echo "<tr>
+                                    <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
                                     <td>
-                                        <img src="<?php echo wp_get_attachment_url( $post_values['image'] ); ?>" class="produktliste_existing_image"/>
-                                    </td>
-                                </tr>
-                                <?php
-                            }
-                            ?>
-                        </tr>
-                        <tr>
-                            <th><label for="alt_txt">Kort og beskrivende tekst av selve bildet.</label></th>
-                            <td><input name="alt_txt" type="text" value="<?php
-                                if ($post_values['alt_txt']){
-                                    echo esc_attr( $post_values['alt_txt'] );
-                                }?>" class="regular-text" />
-                                <?php
-                                //if there is a iamge alt-txt error message
-                                if (count($post_values['validation_errors']['alt_txt'])) {
-                                    echo $post_values['validation_errors']['alt_txt'];
-                                }
-                                ?>
-                            </td>
+                                        <input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' />";
+                                        if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
+                                            echo $post_values['validation_errors']['ingredient'][$i]['ingredient_name'];
+                                        }
 
+                                    echo "</td>";
+                                    if ( $post_values['ingredient'][$i]['allergen'] === 1) {
+                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></div></td>";
+                                    } else {
+                                        echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></div></td>";
+                                    }
+                                    echo "<td><input type='hidden' name='ingredient[" . ($i) . "][" . 'remove' . "]' value='0'/><button class='ingredient-delete-button button'>Slett</button></td>";
+                                    if ($post_values['ingredient'][$i]['ingredient_id']) {
+                                        echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
+                                    }
+                                echo "</tr>";
+                            }
+                        }
+                        ?>
+                        <tr id="ingredients_wrapper">
+                            <th></th>
+                            <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
                         </tr>
                         </tbody>
                     </table>
-                    <div class="ingredients-div-container">
-                        <table class="form-table">
-                            <tbody>
-                            <tr>
-                                <th><h3>Ingredienser</h3></th>
-                                <td></td>
-                                <td><p class="float-right allergen-titel">Allergen?</p></td>
-                            </tr>
-                            <?php
-                            //if no ingredients were added for a new product
-                            if ($post_values['validation_errors']['ingredients_number']) {
-                                echo '<tr><th></th><td>';
-                                echo $post_values['validation_errors']['ingredients_number'];
-                                echo '</td></tr>';
-                            }
-                            //loop for ingredients
-                            if ( count($post_values['ingredient']) !== 0) {
-                                for ($i = 0; $i < count($post_values['ingredient']); $i++) {
-                                    echo "<tr>
-                                        <th><label for='ingredient[" . ($i) . "]'>Ingrediens " . ($i+1) . "</label></th>
-                                        <td>
-                                            <input name='ingredient[" . ($i) . "][" . 'ingredient_name' . "]' type='text' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_name']) . "' class='regular-text productlist_ingredient' />";
-                                            if ( $post_values['validation_errors']['ingredient'][$i]['ingredient_name'] ) {
-                                                echo $post_values['validation_errors']['ingredient'][$i]['ingredient_name'];
-                                            }
-
-                                        echo "</td>";
-                                        if ( $post_values['ingredient'][$i]['allergen'] === 1) {
-                                            echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' checked='checked'/></div></td>";
-                                        } else {
-                                            echo "<td><p class='allergen-titel-mobile'>Allergen?</p><div class='allergen-checkbox-div'><input name='ingredient[" . ($i) . "][" . 'allergen' . "]' type='checkbox' value='1' class='regular-text' /></div></td>";
-                                        }
-                                        echo "<td><input type='hidden' name='ingredient[" . ($i) . "][" . 'remove' . "]' value='0'/><button class='ingredient-delete-button button'>Slett</button></td>";
-                                        if ($post_values['ingredient'][$i]['ingredient_id']) {
-                                            echo "<input type='hidden' name='ingredient[" . ($i) . "][" . 'ingredient_id' . "]' value='" . esc_attr($post_values['ingredient'][($i)]['ingredient_id']) . "' />";
-                                        }
-                                    echo "</tr>";
-                                }
-                            }
-                            ?>
-                            <tr id="ingredients_wrapper">
-                                <th></th>
-                                <td><p class="button button-primary" id="new_ingredient">Legg til en ingrediens</p></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p class="submit">
-                        <input type="submit" name="submit" class="button button-primary button-large" value="Lagre Produkt">
-                    </p>
-                </form>
-                <form method="POST">
-                    <p class="submit">
-                        <input type="submit" name="reset" class="button" value="Reset siden">
-                    </p>
-                </form>
-            </div>
-            <?php
-        }
+                </div>
+                <p class="submit">
+                    <input type="submit" name="submit" class="button button-primary button-large" value="Lagre Produkt">
+                </p>
+            </form>
+            <form method="POST">
+                <p class="submit">
+                    <input type="submit" name="reset" class="button" value="Reset siden">
+                </p>
+            </form>
+        </div>
+        <?php
+    } else {
+        ?>
+        <div class="produktliste_wrapper">
+            <div><h2 class="hv-header hv-header_first">Mangler kategorier!</h2></div>
+            <div><p>Det er ikke lagt til noen kategorier i produktlisten. Vennligst gjør dette under Kategorier-menyen først.</p></div>
+        </div>
+        <?php
+    }
 }
 
 /**********************************************************
@@ -1496,10 +1506,9 @@ function produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $
 
 function produktliste_setup_menu() {
 
-    //the code that creates the admin page of the plugin
-    function produktliste_init() {
+    //the code that creates the admin page of the plugin, contains the category options
+    function produktliste_products() {
         $post_values;
-        $post_values_cat;
 
         //declaring db variables
         global $wpdb;
@@ -1520,16 +1529,6 @@ function produktliste_setup_menu() {
         //Checking for 'delete_product' to process the form on POST
         if( $_POST['delete_product'] === 'true' ){
             produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients);
-        }
-
-        //Checking for 'new_category' to process the form on POST
-        if( $_POST['new_category'] === 'true' ){
-            $post_values_cat = produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values_cat);
-        }
-
-        //Checking for 'edit_or_delete_category' to process the form on POST
-        if( $_POST['edit_or_delete_category'] === 'true' ){
-            $post_values_cat = produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_main, $table_name_product_category, $post_values_cat);
         }
 
         //declaring variables and querying db for needed information
@@ -1561,7 +1560,6 @@ function produktliste_setup_menu() {
                 <h1>Administrator side for Produktliste plugin</h1>
             </div>
             <?php
-            show_create_new_or_edit_categories($categories, $post_values_cat);
             show_adminpage_product_forms($categories, $post_values);
             show_produktliste_admin($categories, $produktliste_results, $ingredients);
             ?>
@@ -1570,13 +1568,66 @@ function produktliste_setup_menu() {
 
     }
 
+    function produktliste_init() {
+        $post_values_cat;
+
+        //declaring db variables
+        global $wpdb;
+        $table_name_main = $wpdb->prefix . "produktliste_produkter";
+        $table_name_product_category = $wpdb->prefix . "produktliste_kategorier";
+
+        //Checking for 'new_category' to process the form on POST
+        if( $_POST['new_category'] === 'true' ){
+            $post_values_cat = produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values_cat);
+        }
+
+        //Checking for 'edit_or_delete_category' to process the form on POST
+        if( $_POST['edit_or_delete_category'] === 'true' ){
+            $post_values_cat = produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_main, $table_name_product_category, $post_values_cat);
+        }
+
+        //declaring variables and querying db for needed information
+        $categories;
+
+        //query the db for categories
+        $categories =   $wpdb->get_results("SELECT * FROM $table_name_product_category ORDER BY category_name", ARRAY_A);
+
+        ?>
+        <div>
+            <div>
+                <h1>Administrator side for Produktliste plugin</h1>
+            </div>
+            <?php
+            show_create_new_or_edit_categories($categories, $post_values_cat);
+            ?>
+        </div>
+        <?php
+    }
+
     add_menu_page(
         'Produktliste Plugin Side',
-        'Produktliste Plugin',
+        'Produktliste',
         'manage_options',
-        'produktliste-plugin',
+        'produktliste',
         'produktliste_init',
         'dashicons-admin-plugins'
+    );
+
+    add_submenu_page(
+        'produktliste',
+        'Produktliste Kategorier',
+        'Kategorier',
+        'manage_options',
+        'produktliste'
+    );
+
+    add_submenu_page(
+        'produktliste',
+        'Produktliste Produkter',
+        'Produkter',
+        'manage_options',
+        'produktliste-produkter',
+        'produktliste_products'
     );
 }
 
