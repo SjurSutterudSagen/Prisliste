@@ -28,7 +28,7 @@ add_action('admin_enqueue_scripts', 'load_produktliste_js_admin');
 
 //DB versioning
 global $produktliste_db_version;
-$produktliste_db_version = "1.4";
+$produktliste_db_version = "1.5";
 
 //creating the db when plugin is activated
 register_activation_hook( __FILE__, 'produktliste_install' );
