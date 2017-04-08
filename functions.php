@@ -1594,7 +1594,7 @@ function validate_product_name($productname) {
     if ( $productname === "") {
         return '<p>Produktnavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $productname) ) {
-        return '<p>Bare store og små bokstaver, komma, punktum tall, parenteser, & og % er tillatt i produktnavnet.</p>';
+        return '<p>Bare store og små bokstaver, komma, punktum, tall, parenteser, mellomrom, & og % er tillatt i produktnavnet.</p>';
     } elseif ( (strlen($productname) < 3) || (strlen($productname) > 200) ) {
         return '<p>Produktnavn må være mellom 3 og 200 bokstaver.</p>';
     }
@@ -1658,18 +1658,18 @@ function validate_ingredient($ingredient_name) {
     if ( $ingredient_name === "" ) {
         return '<p>Ingrediensnavnet mangler.</p>';
     } elseif ( preg_match($preg_pattern, $ingredient_name) ) {
-        return '<p>Bare store og små bokstaver, komma, punktum tall, bindestrek, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
+        return '<p>Bare store og små bokstaver, komma, punktum, tall, bindestrek, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
     } elseif ( (strlen($ingredient_name) < 3) || (strlen($ingredient_name) > 200) ) {
         return '<p>Ingrediensnavnet må være mellom 3 og 200 bokstaver.</p>';
     }
 }
 
 function validate_weight($weight) {
-    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9(),.\- ]/";
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9() ]/";
     if ( $weight === "" ) {
         return '<p>Vekt mangler.</p>';
     } elseif ( preg_match($preg_pattern, $weight) ) {
-        return '<p>Bare store og små bokstaver, komma, punktum tall, bindestrek, parenteser er tillatt i vekten.</p>';
+        return '<p>Bare store og små bokstaver, tall og mellomrom er tillatt i vekten.</p>';
     } elseif ( (strlen($weight) < 3) || (strlen($weight) > 20) ) {
         return '<p>Vekt må være mellom 3 og 20 bokstaver.</p>';
     }
