@@ -798,7 +798,7 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
         $post_values_cat['category_name'] = sanitize_text_field($_POST['category_input']);
 
         //validate postdata
-        $post_values_cat['errormessage'] = validate_category_name( $post_values_cat['category_name'] );
+        $post_values_cat['errormessage'] = validate_category_name( $wpdb, $table_name_product_category, $post_values_cat['category_name'] );
         if ( count($post_values_cat['errormessage']) !== 0  ) {
             ?>
             <script>
@@ -1671,14 +1671,21 @@ function produktliste_setup_menu() {
 /******************************************
  *   Functions for validating the inputs  *
  *****************************************/
-function validate_category_name($categoryname) {
+function validate_category_name($wpdb, $table_name_product_category, $categoryname) {
+    $cat = $wpdb->get_row( $wpdb->prepare( "
+                SELECT category_name
+                FROM {$table_name_product_category}
+                WHERE category_name = %s", $categoryname), ARRAY_A);
+
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ ]/";
     if ( $categoryname === "") {
         return '<p class="custom-error-message">Kategorinavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $categoryname) ) {
         return '<p class="custom-error-message">Bare store og små bokstaver og mellomrom er tillatt i kategorinavnet.</p>';
     } elseif ( (strlen($categoryname) < 3) || (strlen($categoryname) > 25) ) {
-        return '<p class="custom-error-message">Produktnavn må være mellom 3 og 25 bokstaver.</p>';
+        return '<p class="custom-error-message">Kategorinavn må være mellom 3 og 25 bokstaver.</p>';
+    } elseif ( !empty($cat) ) {
+        return '<p class="custom-error-message">Kategorier må være unike.</p>';
     } else {
         return NULL;
     }
