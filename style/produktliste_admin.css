@@ -39,6 +39,12 @@
   background: red;
 }
 
+.custom-error-message {
+  background-color: #F89406;
+  color: #fff;
+  padding: 10px;
+}
+
 
 
 div.accordion {

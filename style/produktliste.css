@@ -77,6 +77,8 @@ img.accordion-image {
   margin-top: 15px;
 }
 
+
+
 @media screen and (min-width: 480px) {
   div.accordion-content {
     width: 38%;
