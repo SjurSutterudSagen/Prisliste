@@ -771,13 +771,13 @@ function show_adminpage_product_forms($categories, $post_values) {
  *   Functions for building and processing the adminpage  *
  *********************************************************/
 
-//TODO: Add check for what the current user can do!
-
 //processing POST to the plugin page from the category form (new category)
 function produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values_cat) {
     if(
+        (
         ! isset( $_POST['produktliste_new_category_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_new_category_form'], 'produktliste_new_category_update' )
+        ) && ( current_user_can('produktliste_cap') )
     ){  ?>
         <div class="error">
             <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
@@ -873,8 +873,10 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
 //processing POST to the plugin page from the category form (edit/delete category)
 function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_main, $table_name_product_category, $post_values_cat) {
     if(
+        (
         ! isset( $_POST['produktliste_edit_or_delete_category_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_edit_or_delete_category_form'], 'produktliste_edit_or_delete_category_update' )
+        ) && ( current_user_can('produktliste_cap') )
     ){  ?>
       <script>
         toastr.options = {
@@ -1013,8 +1015,10 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_mai
 //processing POST to the plugin page from the main form
 function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_ingredients, $post_values) {
     if(
+        (
         ! isset( $_POST['produktliste_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
+        ) && ( current_user_can('produktliste_cap') )
     ){ ?>
       <script>
         toastr.options = {
@@ -1397,8 +1401,10 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 //processing POST to the plugin page from the product edit button
 function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values) {
     if(
+        (
         ! isset( $_POST['produktliste_product_edit_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_product_edit_form'], 'produktliste_product_edit_update' )
+        ) && ( current_user_can('produktliste_cap') )
     ){ ?>
         <div class="error">
             <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
@@ -1446,8 +1452,10 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
 //processing POST to the plugin page from the product delete button
 function produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_ingredients) {
     if(
+        (
         ! isset( $_POST['produktliste_product_delete_form'] ) ||
         ! wp_verify_nonce( $_POST['produktliste_product_delete_form'], 'produktliste_product_delete_update' )
+        ) && ( current_user_can('produktliste_cap') )
     ){ ?>
         <div class="error">
             <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
