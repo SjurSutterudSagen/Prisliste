@@ -1305,9 +1305,26 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
             if ( isset($post_values['validation_errors']) && count($post_values['validation_errors']) !== 0){
                 //if there are errors
                 ?>
-                <div class="error">
-                    <p>Vennligst fiks feilene!</p>
-                </div>
+                <script>
+                  toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                  };
+                  toastr.warning('<br /><br />Vennligst fiks feilene!<br /><br />');
+                </script>
                 <?php
                 return $post_values;
 
@@ -1657,11 +1674,11 @@ function produktliste_setup_menu() {
 function validate_category_name($categoryname) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ ]/";
     if ( $categoryname === "") {
-        return '<p>Kategorinavn mangler.</p>';
+        return '<p class="custom-error-message">Kategorinavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $categoryname) ) {
-        return '<p>Bare store og små bokstaver og mellomrom er tillatt i kategorinavnet.</p>';
+        return '<p class="custom-error-message">Bare store og små bokstaver og mellomrom er tillatt i kategorinavnet.</p>';
     } elseif ( (strlen($categoryname) < 3) || (strlen($categoryname) > 25) ) {
-        return '<p>Produktnavn må være mellom 3 og 25 bokstaver.</p>';
+        return '<p class="custom-error-message">Produktnavn må være mellom 3 og 25 bokstaver.</p>';
     } else {
         return NULL;
     }
@@ -1670,11 +1687,11 @@ function validate_category_name($categoryname) {
 function validate_product_name($productname) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\%,. ]/";
     if ( $productname === "") {
-        return '<p>Produktnavn mangler.</p>';
+        return '<p class="custom-error-message">Produktnavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $productname) ) {
-        return '<p>Bare store og små bokstaver, komma, punktum, tall, parenteser, mellomrom, & og % er tillatt i produktnavnet.</p>';
+        return '<p class="custom-error-message">Bare store og små bokstaver, komma, punktum, tall, parenteser, mellomrom, & og % er tillatt i produktnavnet.</p>';
     } elseif ( (strlen($productname) < 3) || (strlen($productname) > 200) ) {
-        return '<p>Produktnavn må være mellom 3 og 200 bokstaver.</p>';
+        return '<p class="custom-error-message">Produktnavn må være mellom 3 og 200 bokstaver.</p>';
     } else {
         return NULL;
     }
@@ -1683,11 +1700,11 @@ function validate_product_name($productname) {
 function validate_price($price) {
     $preg_pattern = "/d{1,5}/";
     if ($price === "") {
-        return '<p>Pris mangler.</p>';
+        return '<p class="custom-error-message">Pris mangler.</p>';
     } elseif ( preg_match($preg_pattern, $price) ) {
-        return '<p>Bare tall er tillatt i prisen.</p>';
+        return '<p class="custom-error-message">Bare tall er tillatt i prisen.</p>';
     } elseif ( (strlen($price) < 1) || (strlen($price) > 5) ) {
-        return '<p>Pris må være mellom 1 og 5 tall.</p>';
+        return '<p class="custom-error-message">Pris må være mellom 1 og 5 tall.</p>';
     } else {
         return NULL;
     }
@@ -1696,11 +1713,11 @@ function validate_price($price) {
 function validate_image_alt_txt($img_alt_txt) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9,. ]/";
     if ( $img_alt_txt === "") {
-        return '<p>Alt-teksten til bildet mangler.</p>';
+        return '<p class="custom-error-message">Alt-teksten til bildet mangler.</p>';
     } elseif ( preg_match($preg_pattern, $img_alt_txt) ) {
-        return '<p>Bare store og små bokstaver, komma, punktum og tall er tillatt i alt-teksten til bildet.</p>';
+        return '<p class="custom-error-message">Bare store og små bokstaver, komma, punktum og tall er tillatt i alt-teksten til bildet.</p>';
     } elseif ( (strlen($img_alt_txt) < 3) || (strlen($img_alt_txt) > 100) ) {
-        return '<p>Alt-teksten til bildet må være mellom 3 og 100 bokstaver.</p>';
+        return '<p class="custom-error-message">Alt-teksten til bildet må være mellom 3 og 100 bokstaver.</p>';
     } else {
         return NULL;
     }
@@ -1728,11 +1745,11 @@ function validate_image($img) {
     }
 
     if ($img['error'] !== 0) {
-        return '<p>Dette er ikke et gyldig bildet.</p>';
+        return '<p class="custom-error-message">Dette er ikke et gyldig bildet.</p>';
     } elseif (!$ext) {
-        return '<p>Bildet har ikke en gyldig filtype. Gyldige filetyper er: .jpeg .jpg .png.</p>';
+        return '<p class="custom-error-message">Bildet har ikke en gyldig filtype. Gyldige filetyper er: .jpeg .jpg .png.</p>';
     } elseif ($img['size'] > $allowed_size) {
-        return '<p>Bildet er for stort. Maks tillatt størrelse er 5MB.</p>';
+        return '<p class="custom-error-message">Bildet er for stort. Maks tillatt størrelse er 5MB.</p>';
     } else {
         return NULL;
     }
@@ -1741,11 +1758,11 @@ function validate_image($img) {
 function validate_ingredient($ingredient_name) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9(),.\&\%\- ]/";
     if ( $ingredient_name === "" ) {
-        return '<p>Ingrediensnavnet mangler.</p>';
+        return '<p class="custom-error-message">Ingrediensnavnet mangler.</p>';
     } elseif ( preg_match($preg_pattern, $ingredient_name) ) {
-        return '<p>Bare store og små bokstaver, komma, punktum, tall, bindestrek, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
+        return '<p class="custom-error-message">Bare store og små bokstaver, komma, punktum, tall, bindestrek, parenteser, & og % er tillatt i ingrediensnavnet.</p>';
     } elseif ( (strlen($ingredient_name) < 3) || (strlen($ingredient_name) > 200) ) {
-        return '<p>Ingrediensnavnet må være mellom 3 og 200 bokstaver.</p>';
+        return '<p class="custom-error-message">Ingrediensnavnet må være mellom 3 og 200 bokstaver.</p>';
     } else {
         return NULL;
     }
@@ -1754,11 +1771,11 @@ function validate_ingredient($ingredient_name) {
 function validate_weight($weight) {
     $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9() ]/";
     if ( $weight === "" ) {
-        return '<p>Vekt mangler.</p>';
+        return '<p class="custom-error-message">Vekt mangler.</p>';
     } elseif ( preg_match($preg_pattern, $weight) ) {
-        return '<p>Bare store og små bokstaver, tall og mellomrom er tillatt i vekten.</p>';
+        return '<p class="custom-error-message">Bare store og små bokstaver, tall og mellomrom er tillatt i vekten.</p>';
     } elseif ( (strlen($weight) < 3) || (strlen($weight) > 20) ) {
-        return '<p>Vekt må være mellom 3 og 20 bokstaver.</p>';
+        return '<p class="custom-error-message">Vekt må være mellom 3 og 20 bokstaver.</p>';
     } else {
         return NULL;
     }
