@@ -598,7 +598,7 @@ function show_adminpage_product_forms($categories, $post_values) {
                             <select name="category" type="text" value="" class="regular-text">
                                 <?php
                                 foreach ($categories as $category) {
-                                    if ($post_values['category'] === $category['category_id']) {
+                                    if ($post_values['category'] === absint($category['category_id']) ) {
                                         echo "<option value='" . esc_attr( $category['category_id'] ) . "' selected='selected'>" . esc_html( $category['category_name'] ) . "</option>";
                                     } else {
                                         echo "<option value='" . esc_attr( $category['category_id'] ) . "'>" . esc_html( $category['category_name'] ) . "</option>";
