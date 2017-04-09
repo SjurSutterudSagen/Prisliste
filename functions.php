@@ -1107,7 +1107,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 //only validating ingredient name since allergen is a boolean and ingredient_id is an id number(
                 if ( $post_values['ingredient'][$count]['remove'] === 0 ) {
                     if (validate_ingredient($post_values['ingredient'][$count]['ingredient_name']) !== NULL) {
-                        $post_values['validation_errors']['ingredient'][$count]['ingredient_name'] = validate_ingredient($post_values['ingredient'][$count]['ingredient_name'] !== NULL);
+                        $post_values['validation_errors']['ingredient'][$count]['ingredient_name'] = validate_ingredient($post_values['ingredient'][$count]['ingredient_name']);
                     }
                 }
                 $count++;
