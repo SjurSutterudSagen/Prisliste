@@ -598,7 +598,7 @@ function show_adminpage_product_forms($categories, $post_values) {
                             <select name="category" type="text" value="" class="regular-text">
                                 <?php
                                 foreach ($categories as $category) {
-                                    if ($post_values['category'] === $category['category_id']) {
+                                    if ($post_values['category'] === absint($category['category_id']) ) {
                                         echo "<option value='" . esc_attr( $category['category_id'] ) . "' selected='selected'>" . esc_html( $category['category_name'] ) . "</option>";
                                     } else {
                                         echo "<option value='" . esc_attr( $category['category_id'] ) . "'>" . esc_html( $category['category_name'] ) . "</option>";
@@ -774,10 +774,9 @@ function show_adminpage_product_forms($categories, $post_values) {
 //processing POST to the plugin page from the category form (new category)
 function produktliste_handle_post_new_category($wpdb, $table_name_product_category, $post_values_cat) {
     if(
-        (
         ! isset( $_POST['produktliste_new_category_form'] ) ||
-        ! wp_verify_nonce( $_POST['produktliste_new_category_form'], 'produktliste_new_category_update' )
-        ) && ( current_user_can('produktliste_cap') )
+        ! wp_verify_nonce( $_POST['produktliste_new_category_form'], 'produktliste_new_category_update' ) ||
+        ! current_user_can('produktliste_cap')
     ){  ?>
         <div class="error">
             <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
@@ -873,10 +872,9 @@ function produktliste_handle_post_new_category($wpdb, $table_name_product_catego
 //processing POST to the plugin page from the category form (edit/delete category)
 function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_main, $table_name_product_category, $post_values_cat) {
     if(
-        (
         ! isset( $_POST['produktliste_edit_or_delete_category_form'] ) ||
-        ! wp_verify_nonce( $_POST['produktliste_edit_or_delete_category_form'], 'produktliste_edit_or_delete_category_update' )
-        ) && ( current_user_can('produktliste_cap') )
+        ! wp_verify_nonce( $_POST['produktliste_edit_or_delete_category_form'], 'produktliste_edit_or_delete_category_update' ) ||
+        ! current_user_can('produktliste_cap')
     ){  ?>
       <script>
         toastr.options = {
@@ -1015,10 +1013,9 @@ function produktliste_handle_post_edit_or_delete_category($wpdb, $table_name_mai
 //processing POST to the plugin page from the main form
 function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name_product_ingredients, $post_values) {
     if(
-        (
         ! isset( $_POST['produktliste_form'] ) ||
-        ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' )
-        ) && ( current_user_can('produktliste_cap') )
+        ! wp_verify_nonce( $_POST['produktliste_form'], 'produktliste_update' ) ||
+        ! current_user_can('produktliste_cap')
     ){ ?>
       <script>
         toastr.options = {
@@ -1401,10 +1398,9 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
 //processing POST to the plugin page from the product edit button
 function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $table_name_product_category, $table_name_product_ingredients, $post_values) {
     if(
-        (
         ! isset( $_POST['produktliste_product_edit_form'] ) ||
-        ! wp_verify_nonce( $_POST['produktliste_product_edit_form'], 'produktliste_product_edit_update' )
-        ) && ( current_user_can('produktliste_cap') )
+        ! wp_verify_nonce( $_POST['produktliste_product_edit_form'], 'produktliste_product_edit_update' ) ||
+        ! current_user_can('produktliste_cap')
     ){ ?>
         <div class="error">
             <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
@@ -1452,10 +1448,9 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
 //processing POST to the plugin page from the product delete button
 function produktliste_handle_post_product_delete_form($wpdb, $table_name_main, $table_name_product_ingredients) {
     if(
-        (
         ! isset( $_POST['produktliste_product_delete_form'] ) ||
-        ! wp_verify_nonce( $_POST['produktliste_product_delete_form'], 'produktliste_product_delete_update' )
-        ) && ( current_user_can('produktliste_cap') )
+        ! wp_verify_nonce( $_POST['produktliste_product_delete_form'], 'produktliste_product_delete_update' ) ||
+        ! current_user_can('produktliste_cap')
     ){ ?>
         <div class="error">
             <p>Sikkerhetsjekk feilet: Din nonce var ikke korrekt. Vennligst prøv igjen.</p>
@@ -1690,8 +1685,8 @@ function validate_category_name($wpdb, $table_name_product_category, $categoryna
         return '<p class="custom-error-message">Kategorinavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $categoryname) ) {
         return '<p class="custom-error-message">Bare store og små bokstaver og mellomrom er tillatt i kategorinavnet.</p>';
-    } elseif ( (strlen($categoryname) < 3) || (strlen($categoryname) > 25) ) {
-        return '<p class="custom-error-message">Kategorinavn må være mellom 3 og 25 bokstaver.</p>';
+    } elseif ( (strlen($categoryname) < 3) || (strlen($categoryname) > 20) ) {
+        return '<p class="custom-error-message">Kategorinavn må være mellom 3 og 20 bokstaver.</p>';
     } elseif ( !empty($cat) ) {
         return '<p class="custom-error-message">Kategorier må være unike.</p>';
     } else {
@@ -1700,13 +1695,13 @@ function validate_category_name($wpdb, $table_name_product_category, $categoryna
 }
 
 function validate_product_name($productname) {
-    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\%,. ]/";
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ ]/";
     if ( $productname === "") {
         return '<p class="custom-error-message">Produktnavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $productname) ) {
-        return '<p class="custom-error-message">Bare store og små bokstaver, komma, punktum, tall, parenteser, mellomrom, & og % er tillatt i produktnavnet.</p>';
-    } elseif ( (strlen($productname) < 3) || (strlen($productname) > 200) ) {
-        return '<p class="custom-error-message">Produktnavn må være mellom 3 og 200 bokstaver.</p>';
+        return '<p class="custom-error-message">Bare store og små bokstaver og mellomrom er tillatt i produktnavnet.</p>';
+    } elseif ( (strlen($productname) < 3) || (strlen($productname) > 20) ) {
+        return '<p class="custom-error-message">Produktnavn må være mellom 3 og 20 bokstaver.</p>';
     } else {
         return NULL;
     }
