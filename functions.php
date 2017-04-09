@@ -1427,7 +1427,7 @@ function produktliste_handle_post_product_edit_form($wpdb, $table_name_main, $ta
         //updating $post_values with correct values
         $post_values['product_id'] = $product['id'];
         $post_values['productname'] = $product['product_name'];
-        $post_values['category'] = $product['category'];
+        $post_values['category'] = absint($product['category']);
         $post_values['price'] = $product['price'];
         $post_values['price_type'] = $product['price_type'];
         $post_values['weight'] = $product['weight'];
