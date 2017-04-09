@@ -1113,7 +1113,7 @@ function produktliste_handle_post_main_form($wpdb, $table_name_main, $table_name
                 $count++;
             }
         } else {
-            $post_values['validation_errors']['ingredients_number'] = '<p>Mangler ingredienser</p>';
+            $post_values['validation_errors']['ingredients_number'] = '<p class="custom-error-message">Mangler ingredienser</p>';
         }
 
         if ( isset($post_values['product_id']) && ($post_values['product_id'] !== 0) ) {
