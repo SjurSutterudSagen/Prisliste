@@ -2,8 +2,8 @@
 /*
 Plugin Name: Produktliste
 Description: En produktliste plugin for Hadeland Viltslakteri
-Author: Sjur Sutterud Sagen, <a href="https://eriksendesign.no/">Dag-Roger Eriksen</a>
-Version: 1.0
+Author: <a href="https://www.linkedin.com/in/sjur-sutterud-sagen-a1483911b/">Sjur Sutterud Sagen</a>, <a href="https://eriksendesign.no/">Dag-Roger Eriksen</a>
+Version: 1.1
 */
 
 //security check for XSS attack
