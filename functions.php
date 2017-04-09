@@ -473,15 +473,15 @@ function show_produktliste_admin($categories, $produktliste_results, $ingredient
                                              class='accordion-thumbnail'
                                         />
                                     </div>
-                                    <div class='accordion-content'>" . esc_html( $product['product_name'] ) . "</div>
-                                    <div class='accordion-content'>" . esc_html( $product['price'] );
+                                    <div class='accordion-content accordion-content-name'>" . esc_html( $product['product_name'] ) . "</div>
+                                    <div class='accordion-content accordion-content-price'>" . esc_html( $product['price'] );
                         if ( $product['price_type'] == 0 ) {
                             $output .= "kr/kg";
                         } elseif ($product['price_type'] == 1) {
                             $output .= "kr/stk";
                         }
                         $output .= "</div>
-                                    <div class='accordion-content'><i class='fa fa-chevron-down icon-placement' aria-hidden='true'></i></div>
+                                    <div class='accordion-content accordion-content-icon'><i class='fa fa-chevron-down icon-placement' aria-hidden='true'></i></div>
                                 </div>
                                 <div class='panel'>
                                     <img src='" . wp_get_attachment_url( $product['picture_id'] ) . "'

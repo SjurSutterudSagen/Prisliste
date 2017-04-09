@@ -3,7 +3,10 @@
  * Copied from what Jonas had done earlier.
  * Edit by Dag-Roger on 03.04.2017
  */
-
+* {
+  margin: 0;
+  padding: 0;
+}
 
  #delete_product_yes {
    margin-right: 10px;
@@ -52,6 +55,7 @@ div.accordion {
   background-color: #eee;
   color: #444;
   cursor: pointer;
+  height: 1px;
   padding-top: 18px;
   padding-bottom: 57px;
   padding-left: 18px;
@@ -66,10 +70,23 @@ div.accordion.active, div.accordion:hover {
 }
 
 div.accordion-content {
-  width: 33%; /* Sett til 30% med thumbnail, hvis den tar 10%*/
   float: left;
   margin: 0;
   padding: 0;
+}
+
+div.accordion-content-name {
+  width: 60%;
+  padding-right: 5px;
+}
+
+div.accordion-content-price {
+  width: 26%;
+}
+
+div.accordion-content-icon {
+  width: 12%;
+  float: right;
 }
 
 .accordion-thumbnail-div {
@@ -78,7 +95,7 @@ div.accordion-content {
 }
 
 .accordion-thumbnail {
-  width: 82%;
+  width: 100%;
   height: auto;
   margin: -18px;
 }
@@ -89,7 +106,7 @@ div.accordion-content {
 
 i.icon-placement {
   float: right;
-  padding-right: 30px;
+  padding-right: 15px;
 }
 
 
