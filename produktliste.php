@@ -36,4 +36,7 @@ add_shortcode('produktliste', 'show_produktliste');
 //code for registrering the plugin with wordpress
 add_action('admin_menu', 'produktliste_setup_menu');
 
+//adding the plugin capabilities to userroles
+register_activation_hook( __FILE__, 'add_plugin_caps' );
+
 ?>
