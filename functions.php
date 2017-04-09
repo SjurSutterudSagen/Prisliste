@@ -674,7 +674,7 @@ function show_adminpage_product_forms($categories, $post_values) {
                             <tr>
                                 <th>Nåværende bilde</th>
                                 <td>
-                                    <img src="<?php echo wp_get_attachment_url( $post_values['image'] ); ?>" class="produktliste_existing_image"/>
+                                    <img src="<?php echo image_downsize(wp_get_attachment_url( $post_values['image'] ), 'medium'); ?>" class="produktliste_existing_image"/>
                                 </td>
                             </tr>
                             <?php
