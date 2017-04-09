@@ -23,10 +23,23 @@ div.accordion.active, div.accordion:hover {
 }
 
 div.accordion-content {
-  width: 33%; /* Sett til 30% med thumbnail, hvis den tar 10%*/
   float: left;
   margin: 0;
   padding: 0;
+}
+
+div.accordion-content-name {
+  width: 60%;
+  padding-right: 5px;
+}
+
+div.accordion-content-price {
+  width: 25%;
+}
+
+div.accordion-content-icon {
+  width: 15%;
+  float: right;
 }
 
 .accordion-thumbnail-div {
@@ -46,7 +59,7 @@ div.accordion-content {
 
 i.icon-placement {
   float: right;
-  padding-right: 30px;
+  padding-right: 15px;
 }
 
 
