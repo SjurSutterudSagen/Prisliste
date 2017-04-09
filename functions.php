@@ -1736,7 +1736,7 @@ function validate_image_alt_txt($img_alt_txt) {
 function validate_image($img) {
     $image_type_info = wp_check_filetype_and_ext($img['name'], $img['name']);
 
-    $allowed_size = 5000000;
+    $allowed_size = 10000000;
 
     $ext = NULL;
     switch ($image_type_info['type']) {
@@ -1759,7 +1759,7 @@ function validate_image($img) {
     } elseif (!$ext) {
         return '<p class="custom-error-message">Bildet har ikke en gyldig filtype. Gyldige filetyper er: .jpeg .jpg .png.</p>';
     } elseif ($img['size'] > $allowed_size) {
-        return '<p class="custom-error-message">Bildet er for stort. Maks tillatt størrelse er 5MB.</p>';
+        return '<p class="custom-error-message">Bildet er for stort. Maks tillatt størrelse er 10MB.</p>';
     } else {
         return NULL;
     }
