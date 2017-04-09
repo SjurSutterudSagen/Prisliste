@@ -1685,8 +1685,8 @@ function validate_category_name($wpdb, $table_name_product_category, $categoryna
         return '<p class="custom-error-message">Kategorinavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $categoryname) ) {
         return '<p class="custom-error-message">Bare store og små bokstaver og mellomrom er tillatt i kategorinavnet.</p>';
-    } elseif ( (strlen($categoryname) < 3) || (strlen($categoryname) > 25) ) {
-        return '<p class="custom-error-message">Kategorinavn må være mellom 3 og 25 bokstaver.</p>';
+    } elseif ( (strlen($categoryname) < 3) || (strlen($categoryname) > 20) ) {
+        return '<p class="custom-error-message">Kategorinavn må være mellom 3 og 20 bokstaver.</p>';
     } elseif ( !empty($cat) ) {
         return '<p class="custom-error-message">Kategorier må være unike.</p>';
     } else {
@@ -1695,13 +1695,13 @@ function validate_category_name($wpdb, $table_name_product_category, $categoryna
 }
 
 function validate_product_name($productname) {
-    $preg_pattern = "/[^a-zA-ZøæåØÆÅ0-9()\&\%,. ]/";
+    $preg_pattern = "/[^a-zA-ZøæåØÆÅ ]/";
     if ( $productname === "") {
         return '<p class="custom-error-message">Produktnavn mangler.</p>';
     } elseif ( preg_match($preg_pattern, $productname) ) {
-        return '<p class="custom-error-message">Bare store og små bokstaver, komma, punktum, tall, parenteser, mellomrom, & og % er tillatt i produktnavnet.</p>';
-    } elseif ( (strlen($productname) < 3) || (strlen($productname) > 200) ) {
-        return '<p class="custom-error-message">Produktnavn må være mellom 3 og 200 bokstaver.</p>';
+        return '<p class="custom-error-message">Bare store og små bokstaver og mellomrom er tillatt i produktnavnet.</p>';
+    } elseif ( (strlen($productname) < 3) || (strlen($productname) > 20) ) {
+        return '<p class="custom-error-message">Produktnavn må være mellom 3 og 20 bokstaver.</p>';
     } else {
         return NULL;
     }
